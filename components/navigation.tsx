@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import { usePersonaTheme } from './persona-theme-context'
+import { useGameStore } from '@/lib/store'
 
 const navItems = [
   { name: 'HOME', href: '#hero' },
@@ -13,7 +13,7 @@ const navItems = [
 ]
 
 export function Navigation() {
-  const { theme } = usePersonaTheme()
+  const theme = useGameStore((state) => state.theme)
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')

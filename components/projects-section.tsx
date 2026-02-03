@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef, useState } from 'react'
-import { usePersonaTheme } from './persona-theme-context'
+import { useGameStore } from '@/lib/store'
 
 const projects = [
   {
@@ -40,7 +40,7 @@ const projects = [
 ]
 
 export function ProjectsSection() {
-  const { theme } = usePersonaTheme()
+  const theme = useGameStore((state) => state.theme)
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   

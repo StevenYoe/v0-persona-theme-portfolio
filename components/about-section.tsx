@@ -1,12 +1,13 @@
 "use client"
 
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import { useRef } from 'react'
-import { usePersonaTheme } from './persona-theme-context'
-import { ParallaxSection } from './parallax-section'
+import { useGameStore } from '@/lib/store'
+import { ParallaxSection, FloatingElement } from './parallax-section'
 
 export function AboutSection() {
-  const { theme } = usePersonaTheme()
+  const theme = useGameStore((state) => state.theme)
+  const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
   const containerRef = useRef<HTMLDivElement>(null)
   
   const { scrollYProgress } = useScroll({
@@ -14,9 +15,15 @@ export function AboutSection() {
     offset: ["start end", "end start"]
   })
 
-  const x1 = useTransform(scrollYProgress, [0, 1], [-200, 200])
-  const x2 = useTransform(scrollYProgress, [0, 1], [200, -200])
-  const rotate = useTransform(scrollYProgress, [0, 1], [-5, 5])
+  const springConfig = { stiffness: 50, damping: 20 }
+  
+  // Multiple parallax layers
+  const x1 = useSpring(useTransform(scrollYProgress, [0, 1], [-300 * parallaxIntensity, 300 * parallaxIntensity]), springConfig)
+  const x2 = useSpring(useTransform(scrollYProgress, [0, 1], [300 * parallaxIntensity, -300 * parallaxIntensity]), springConfig)
+  const y1 = useSpring(useTransform(scrollYProgress, [0, 1], [100 * parallaxIntensity, -100 * parallaxIntensity]), springConfig)
+  const y2 = useSpring(useTransform(scrollYProgress, [0, 1], [-50 * parallaxIntensity, 50 * parallaxIntensity]), springConfig)
+  const rotate = useSpring(useTransform(scrollYProgress, [0, 1], [-5 * parallaxIntensity, 5 * parallaxIntensity]), springConfig)
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.9, 1, 0.9])
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
@@ -32,18 +39,61 @@ export function AboutSection() {
       ref={containerRef}
       className="relative min-h-screen py-32 overflow-hidden"
     >
-      {/* Background decorations */}
+      {/* Deep background layer */}
+      <motion.div 
+        style={{ y: y2, scale }}
+        className="absolute inset-0 pointer-events-none"
+      >
+        {theme === 'persona-5' && (
+          <>
+            {[...Array(10)].map((_, i) => (
+              <motion.div
+                key={`line-${i}`}
+                className="absolute w-full h-px opacity-5"
+                style={{
+                  backgroundColor: accent,
+                  top: `${10 + i * 10}%`,
+                  transform: `rotate(${-2 + i * 0.5}deg)`
+                }}
+              />
+            ))}
+          </>
+        )}
+        {theme === 'persona-4' && (
+          <div className="absolute inset-0 tv-static opacity-10" />
+        )}
+        {theme === 'persona-3' && (
+          [...Array(30)].map((_, i) => (
+            <motion.div
+              key={`star-about-${i}`}
+              animate={{ opacity: [0.1, 0.5, 0.1] }}
+              transition={{ duration: 2 + Math.random() * 2, repeat: Infinity }}
+              className="absolute rounded-full"
+              style={{
+                width: `${1 + Math.random() * 2}px`,
+                height: `${1 + Math.random() * 2}px`,
+                backgroundColor: accent,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+            />
+          ))
+        )}
+      </motion.div>
+
+      {/* Large text background */}
       <motion.div
-        style={{ x: x1 }}
-        className="absolute top-20 -left-20 text-[30vw] font-display opacity-5 pointer-events-none select-none"
+        style={{ x: x1, y: y1 }}
+        className="absolute top-20 -left-20 text-[30vw] font-display opacity-[0.03] pointer-events-none select-none"
         aria-hidden="true"
       >
         ABOUT
       </motion.div>
 
+      {/* Decorative shapes layer */}
       {theme === 'persona-5' && (
         <motion.div
-          style={{ rotate }}
+          style={{ rotate, y: y2 }}
           className="absolute top-1/4 right-0 w-1/3 h-[60%] -skew-x-12 opacity-5"
           aria-hidden="true"
         >
@@ -56,19 +106,55 @@ export function AboutSection() {
         </motion.div>
       )}
 
+      {/* Floating decorative elements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(5)].map((_, i) => (
+          <FloatingElement
+            key={`float-${i}`}
+            floatIntensity={20 + i * 5}
+            rotateIntensity={5}
+            delay={i * 0.8}
+            className="absolute"
+          >
+            <motion.div
+              className={`${theme === 'persona-3' ? 'rounded-full' : theme === 'persona-5' ? 'rotate-45' : ''}`}
+              style={{
+                width: `${20 + Math.random() * 40}px`,
+                height: `${20 + Math.random() * 40}px`,
+                backgroundColor: `${accent}10`,
+                border: `1px solid ${accent}30`,
+                left: `${10 + i * 20}%`,
+                top: `${20 + i * 15}%`,
+              }}
+            />
+          </FloatingElement>
+        ))}
+      </div>
+
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           
           {/* Left column - Image/Visual */}
-          <ParallaxSection speed={0.3} direction="up">
+          <ParallaxSection speed={0.4} direction="up" rotateOnScroll>
             <div className="relative">
-              {/* Frame decoration */}
+              {/* Outer frame with parallax */}
+              <motion.div
+                style={{ rotate }}
+                className="absolute -inset-8 opacity-20"
+              >
+                <div 
+                  className={`w-full h-full border ${theme === 'persona-5' ? '-skew-x-6' : theme === 'persona-3' ? 'rounded-lg' : ''}`}
+                  style={{ borderColor: accent }}
+                />
+              </motion.div>
+
+              {/* Inner frame */}
               <motion.div
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className={`absolute -inset-4 border-2 ${theme === 'persona-5' ? '-skew-x-3' : ''}`}
+                className={`absolute -inset-4 border-2 ${theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''}`}
                 style={{ borderColor: accent }}
               />
               
@@ -78,32 +164,31 @@ export function AboutSection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className={`relative aspect-[4/5] ${theme === 'persona-5' ? '-skew-x-3' : ''} overflow-hidden`}
+                className={`relative aspect-[4/5] ${theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''} overflow-hidden`}
                 style={{ backgroundColor: 'var(--secondary)' }}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
                   <motion.div
                     animate={{ 
-                      scale: [1, 1.05, 1],
-                      opacity: [0.5, 0.8, 0.5]
+                      scale: [1, 1.1, 1],
+                      opacity: [0.3, 0.6, 0.3],
+                      rotate: theme === 'persona-5' ? [0, 5, 0] : [0, 0, 0]
                     }}
                     transition={{ duration: 4, repeat: Infinity }}
-                    className="text-8xl font-display"
+                    className="text-9xl font-display"
                     style={{ color: accent }}
                   >
-                    {theme === 'persona-3' ? '☽' : theme === 'persona-4' ? '📺' : '🎭'}
+                    {theme === 'persona-3' ? '☽' : theme === 'persona-4' ? 'TV' : '♠'}
                   </motion.div>
                 </div>
                 
-                {/* Overlay pattern */}
-                {theme === 'persona-5' && (
-                  <div 
-                    className="absolute inset-0 opacity-20 mix-blend-overlay"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fillOpacity='0.4' fillRule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1.5'/%3E%3C/g%3E%3C/svg%3E")`
-                    }}
-                  />
-                )}
+                {/* Scan lines overlay */}
+                <div 
+                  className="absolute inset-0 opacity-10"
+                  style={{
+                    background: `repeating-linear-gradient(0deg, transparent, transparent 2px, ${accent}10 2px, ${accent}10 4px)`
+                  }}
+                />
               </motion.div>
 
               {/* Floating label */}
@@ -112,6 +197,7 @@ export function AboutSection() {
                 whileInView={{ x: 0, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.5 }}
+                whileHover={{ scale: 1.05, x: 10 }}
                 className={`absolute -bottom-6 -right-6 px-6 py-3 ${theme === 'persona-5' ? 'skew-x-6' : ''}`}
                 style={{ backgroundColor: accent }}
               >
@@ -126,7 +212,7 @@ export function AboutSection() {
           </ParallaxSection>
 
           {/* Right column - Content */}
-          <ParallaxSection speed={0.2} direction="down">
+          <ParallaxSection speed={0.3} direction="down">
             <div className="space-y-8">
               {/* Section label */}
               <motion.div
@@ -135,13 +221,20 @@ export function AboutSection() {
                 viewport={{ once: true }}
                 className="flex items-center gap-4"
               >
-                <div className="w-12 h-px" style={{ backgroundColor: accent }} />
+                <motion.div 
+                  className="w-12 h-px" 
+                  style={{ backgroundColor: accent }}
+                  initial={{ scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                />
                 <span className="text-sm tracking-[0.3em]" style={{ color: accent }}>
                   01 / ABOUT
                 </span>
               </motion.div>
 
-              {/* Title */}
+              {/* Title with staggered animation */}
               <motion.h2
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -149,11 +242,27 @@ export function AboutSection() {
                 transition={{ delay: 0.1 }}
                 className={`font-display text-5xl md:text-6xl tracking-tight ${
                   theme === 'persona-5' ? '-skew-x-3' : ''
-                }`}
+                } ${theme === 'persona-3' ? 'neon-glow' : ''}`}
               >
-                <span style={{ color: accent }}>CRAFTING</span>
+                <motion.span 
+                  style={{ color: accent }}
+                  initial={{ x: -50, opacity: 0 }}
+                  whileInView={{ x: 0, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 }}
+                >
+                  CRAFTING
+                </motion.span>
                 <br />
-                <span className="text-foreground">DIGITAL EXPERIENCES</span>
+                <motion.span 
+                  className="text-foreground"
+                  initial={{ x: -50, opacity: 0 }}
+                  whileInView={{ x: 0, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                >
+                  DIGITAL EXPERIENCES
+                </motion.span>
               </motion.h2>
 
               {/* Description */}
@@ -161,7 +270,7 @@ export function AboutSection() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.4 }}
                 className="space-y-4 text-muted-foreground text-lg leading-relaxed"
               >
                 <p>
@@ -177,30 +286,40 @@ export function AboutSection() {
                 </p>
               </motion.div>
 
-              {/* Stats */}
+              {/* Stats with enhanced parallax */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.5 }}
                 className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8"
               >
                 {stats.map((stat, i) => (
                   <motion.div
                     key={stat.label}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.4 + i * 0.1 }}
-                    className={`text-center p-4 border ${theme === 'persona-5' ? '-skew-x-3' : ''}`}
+                    transition={{ delay: 0.6 + i * 0.1 }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      borderColor: accent,
+                    }}
+                    className={`text-center p-4 border transition-all duration-300 ${
+                      theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''
+                    }`}
                     style={{ borderColor: accent + '40' }}
                   >
-                    <div 
+                    <motion.div 
                       className="font-display text-3xl md:text-4xl"
                       style={{ color: accent }}
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.7 + i * 0.1, type: "spring" }}
                     >
                       {stat.number}
-                    </div>
+                    </motion.div>
                     <div className="text-xs tracking-wider text-muted-foreground mt-1">
                       {stat.label}
                     </div>
@@ -214,8 +333,8 @@ export function AboutSection() {
 
       {/* Bottom decoration */}
       <motion.div
-        style={{ x: x2 }}
-        className="absolute bottom-10 right-0 text-[20vw] font-display opacity-5 pointer-events-none select-none"
+        style={{ x: x2, y: y1 }}
+        className="absolute bottom-10 right-0 text-[20vw] font-display opacity-[0.03] pointer-events-none select-none"
         aria-hidden="true"
       >
         ME

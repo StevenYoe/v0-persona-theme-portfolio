@@ -43,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="persona-5">
+    <html lang="en" className="persona-5" suppressHydrationWarning>
       <body className={`${bebasNeue.variable} ${inter.variable} font-sans antialiased overflow-x-hidden`}>
         {children}
         <Analytics />

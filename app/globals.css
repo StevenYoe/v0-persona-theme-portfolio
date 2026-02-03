@@ -1,0 +1,205 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Persona 5 Theme - Default (Red/Black) */
+:root, .persona-5 {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --card: #1a1a1a;
+  --card-foreground: #ffffff;
+  --popover: #1a1a1a;
+  --popover-foreground: #ffffff;
+  --primary: #e60012;
+  --primary-foreground: #ffffff;
+  --secondary: #2a2a2a;
+  --secondary-foreground: #ffffff;
+  --muted: #1a1a1a;
+  --muted-foreground: #a0a0a0;
+  --accent: #e60012;
+  --accent-foreground: #ffffff;
+  --destructive: #e60012;
+  --destructive-foreground: #ffffff;
+  --border: #333333;
+  --input: #2a2a2a;
+  --ring: #e60012;
+  --radius: 0rem;
+}
+
+/* Persona 4 Theme (Yellow/Fog) */
+.persona-4 {
+  --background: #1a1510;
+  --foreground: #ffd700;
+  --card: #2a2015;
+  --card-foreground: #ffd700;
+  --popover: #2a2015;
+  --popover-foreground: #ffd700;
+  --primary: #ffd700;
+  --primary-foreground: #1a1510;
+  --secondary: #3a3025;
+  --secondary-foreground: #ffd700;
+  --muted: #2a2015;
+  --muted-foreground: #b8a060;
+  --accent: #ffd700;
+  --accent-foreground: #1a1510;
+  --destructive: #ff6b35;
+  --destructive-foreground: #1a1510;
+  --border: #4a4035;
+  --input: #3a3025;
+  --ring: #ffd700;
+  --radius: 0.25rem;
+}
+
+/* Persona 3 Theme (Blue/Teal/Moon) */
+.persona-3 {
+  --background: #0a0f1a;
+  --foreground: #00d4ff;
+  --card: #0f1525;
+  --card-foreground: #00d4ff;
+  --popover: #0f1525;
+  --popover-foreground: #00d4ff;
+  --primary: #00d4ff;
+  --primary-foreground: #0a0f1a;
+  --secondary: #1a2535;
+  --secondary-foreground: #00d4ff;
+  --muted: #0f1525;
+  --muted-foreground: #4a8090;
+  --accent: #00d4ff;
+  --accent-foreground: #0a0f1a;
+  --destructive: #ff4444;
+  --destructive-foreground: #0a0f1a;
+  --border: #1a3040;
+  --input: #1a2535;
+  --ring: #00d4ff;
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --font-sans: var(--font-sans, 'Inter', sans-serif);
+  --font-display: var(--font-display, 'Bebas Neue', sans-serif);
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), 'Bebas Neue', sans-serif;
+  }
+}
+
+/* Custom Persona Styling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but keep functionality */
+body {
+  overflow-x: hidden;
+}
+
+body::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Persona 5 specific styles */
+.persona-5 .skewed-bg {
+  transform: skewY(-3deg);
+}
+
+.persona-5 .skewed-content {
+  transform: skewY(3deg);
+}
+
+/* Persona 4 fog effect */
+.persona-4 .fog-overlay {
+  background: linear-gradient(to bottom, rgba(26, 21, 16, 0.8), transparent);
+}
+
+/* Persona 3 glow effect */
+.persona-3 .neon-glow {
+  text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 40px var(--primary);
+}
+
+/* Parallax container */
+.parallax-container {
+  perspective: 1px;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Sharp angles for P5 */
+.persona-5 .sharp-clip {
+  clip-path: polygon(0 0, 100% 5%, 100% 95%, 0 100%);
+}
+
+/* TV static effect for P4 */
+@keyframes tv-static {
+  0%, 100% { opacity: 0.03; }
+  50% { opacity: 0.08; }
+}
+
+.persona-4 .tv-static::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  animation: tv-static 0.5s infinite;
+  pointer-events: none;
+}
+
+/* Moon glow for P3 */
+@keyframes moon-pulse {
+  0%, 100% { box-shadow: 0 0 30px var(--primary), 0 0 60px var(--primary); }
+  50% { box-shadow: 0 0 50px var(--primary), 0 0 100px var(--primary); }
+}
+
+.persona-3 .moon-glow {
+  animation: moon-pulse 4s ease-in-out infinite;
+}

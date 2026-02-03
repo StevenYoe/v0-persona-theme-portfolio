@@ -1,11 +1,11 @@
 "use client"
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { usePersonaTheme } from './persona-theme-context'
+import { useGameStore } from '@/lib/store'
 import { useState, useEffect, type ReactNode } from 'react'
 
 export function TransitionWrapper({ children }: { children: ReactNode }) {
-  const { theme } = usePersonaTheme()
+  const theme = useGameStore((state) => state.theme)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [prevTheme, setPrevTheme] = useState(theme)
 

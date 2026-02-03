@@ -1,0 +1,334 @@
+"use client"
+
+import React from "react"
+
+import { motion } from 'framer-motion'
+import { useState, useEffect, useCallback } from 'react'
+import { useGameStore, type PersonaTheme } from '@/lib/store'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
+
+const themeOptions: { id: PersonaTheme; label: string; description: string }[] = [
+  { id: 'persona-3', label: 'PERSONA 3', description: 'Blue Moon / Memento Mori' },
+  { id: 'persona-4', label: 'PERSONA 4', description: 'Golden Fog / Reach Out to the Truth' },
+  { id: 'persona-5', label: 'PERSONA 5', description: 'Red Rebellion / Take Your Heart' },
+]
+
+interface SettingItem {
+  id: string
+  label: string
+  type: 'theme' | 'slider' | 'toggle'
+}
+
+const settingItems: SettingItem[] = [
+  { id: 'theme', label: 'THEME', type: 'theme' },
+  { id: 'parallax', label: 'PARALLAX INTENSITY', type: 'slider' },
+  { id: 'cursor', label: 'CUSTOM CURSOR', type: 'toggle' },
+  { id: 'back', label: 'BACK', type: 'toggle' },
+]
+
+export function SettingsMenu() {
+  const theme = useGameStore((state) => state.theme)
+  const setTheme = useGameStore((state) => state.setTheme)
+  const goBack = useGameStore((state) => state.goBack)
+  const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
+  const setParallaxIntensity = useGameStore((state) => state.setParallaxIntensity)
+  const cursorEnabled = useGameStore((state) => state.cursorEnabled)
+  const toggleCursor = useGameStore((state) => state.toggleCursor)
+  
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [themeIndex, setThemeIndex] = useState(
+    themeOptions.findIndex(t => t.id === theme)
+  )
+
+  const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
+
+  const handleAction = useCallback((itemId: string, direction?: 'left' | 'right') => {
+    switch (itemId) {
+      case 'theme':
+        if (direction === 'left') {
+          const newIndex = (themeIndex - 1 + themeOptions.length) % themeOptions.length
+          setThemeIndex(newIndex)
+          setTheme(themeOptions[newIndex].id)
+        } else if (direction === 'right') {
+          const newIndex = (themeIndex + 1) % themeOptions.length
+          setThemeIndex(newIndex)
+          setTheme(themeOptions[newIndex].id)
+        }
+        break
+      case 'parallax':
+        if (direction === 'left') {
+          setParallaxIntensity(Math.max(0, parallaxIntensity - 0.25))
+        } else if (direction === 'right') {
+          setParallaxIntensity(Math.min(2, parallaxIntensity + 0.25))
+        }
+        break
+      case 'cursor':
+        toggleCursor()
+        break
+      case 'back':
+        goBack()
+        break
+    }
+  }, [themeIndex, setTheme, parallaxIntensity, setParallaxIntensity, toggleCursor, goBack])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          e.preventDefault()
+          setSelectedIndex((prev) => (prev - 1 + settingItems.length) % settingItems.length)
+          break
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          e.preventDefault()
+          setSelectedIndex((prev) => (prev + 1) % settingItems.length)
+          break
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          e.preventDefault()
+          handleAction(settingItems[selectedIndex].id, 'left')
+          break
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          e.preventDefault()
+          handleAction(settingItems[selectedIndex].id, 'right')
+          break
+        case 'Enter':
+        case ' ':
+          e.preventDefault()
+          if (settingItems[selectedIndex].id === 'back') {
+            goBack()
+          } else if (settingItems[selectedIndex].type === 'toggle') {
+            handleAction(settingItems[selectedIndex].id)
+          }
+          break
+        case 'Escape':
+          e.preventDefault()
+          goBack()
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedIndex, handleAction, goBack])
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: 'var(--background)' }}
+    >
+      {/* Background effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          animate={{ rotate: [0, 360] }}
+          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
+          style={{
+            background: `repeating-linear-gradient(45deg, transparent, transparent 60px, ${accent}05 60px, ${accent}05 62px)`
+          }}
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-3xl px-8">
+        {/* Title */}
+        <motion.div
+          initial={{ y: -30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="mb-16"
+        >
+          <h1 
+            className={`font-display text-6xl md:text-8xl tracking-wider ${
+              theme === 'persona-5' ? '-skew-x-6' : ''
+            }`}
+            style={{ color: accent }}
+          >
+            SETTINGS
+          </h1>
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="h-1 w-32 mt-4"
+            style={{ backgroundColor: accent, originX: 0 }}
+          />
+        </motion.div>
+
+        {/* Settings list */}
+        <div className="space-y-6">
+          {settingItems.map((item, index) => {
+            const isSelected = selectedIndex === index
+            
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 + index * 0.1 }}
+                className={`relative ${theme === 'persona-5' ? '-skew-x-3' : ''}`}
+              >
+                {/* Selection background */}
+                <motion.div
+                  className="absolute inset-0 -z-10"
+                  animate={{
+                    backgroundColor: isSelected ? `${accent}20` : 'transparent',
+                    scaleX: isSelected ? 1 : 0
+                  }}
+                  style={{ originX: 0 }}
+                  transition={{ duration: 0.2 }}
+                />
+
+                <div 
+                  className={`py-5 px-6 flex items-center justify-between ${
+                    theme === 'persona-5' ? 'skew-x-3' : ''
+                  }`}
+                >
+                  {/* Label */}
+                  <div className="flex items-center gap-4">
+                    <motion.div
+                      animate={{ scale: isSelected ? 1 : 0 }}
+                      className="w-3 h-3"
+                      style={{ backgroundColor: accent }}
+                    />
+                    <span 
+                      className="font-display text-2xl md:text-3xl tracking-wider"
+                      style={{ color: isSelected ? accent : 'var(--foreground)' }}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+
+                  {/* Control */}
+                  <div className="flex items-center gap-4">
+                    {item.id === 'theme' && (
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={() => handleAction('theme', 'left')}
+                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          style={{ color: accent }}
+                        >
+                          {'<'}
+                        </button>
+                        <div className="w-48 text-center">
+                          <span 
+                            className="font-display text-xl tracking-wider"
+                            style={{ color: accent }}
+                          >
+                            {themeOptions[themeIndex].label}
+                          </span>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {themeOptions[themeIndex].description}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleAction('theme', 'right')}
+                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          style={{ color: accent }}
+                        >
+                          {'>'}
+                        </button>
+                      </div>
+                    )}
+
+                    {item.id === 'parallax' && (
+                      <div className="flex items-center gap-4 w-64">
+                        <button
+                          onClick={() => handleAction('parallax', 'left')}
+                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          style={{ color: accent }}
+                        >
+                          {'<'}
+                        </button>
+                        <Slider
+                          value={[parallaxIntensity * 50]}
+                          max={100}
+                          step={12.5}
+                          onValueChange={(value) => setParallaxIntensity(value[0] / 50)}
+                          className="flex-1"
+                          style={{ 
+                            '--slider-track': `${accent}30`,
+                            '--slider-range': accent,
+                            '--slider-thumb': accent
+                          } as React.CSSProperties}
+                        />
+                        <button
+                          onClick={() => handleAction('parallax', 'right')}
+                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          style={{ color: accent }}
+                        >
+                          {'>'}
+                        </button>
+                        <span 
+                          className="font-display text-lg w-12 text-right"
+                          style={{ color: accent }}
+                        >
+                          {Math.round(parallaxIntensity * 100)}%
+                        </span>
+                      </div>
+                    )}
+
+                    {item.id === 'cursor' && (
+                      <Switch
+                        checked={cursorEnabled}
+                        onCheckedChange={toggleCursor}
+                        style={{
+                          backgroundColor: cursorEnabled ? accent : 'var(--secondary)'
+                        }}
+                      />
+                    )}
+
+                    {item.id === 'back' && (
+                      <button
+                        onClick={goBack}
+                        className="font-display text-xl tracking-wider px-6 py-2 border-2 hover:bg-accent/20 transition-colors"
+                        style={{ borderColor: accent, color: accent }}
+                      >
+                        {'<'} RETURN
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                {item.id !== 'back' && (
+                  <div 
+                    className="absolute bottom-0 left-0 right-0 h-px opacity-20"
+                    style={{ backgroundColor: accent }}
+                  />
+                )}
+              </motion.div>
+            )
+          })}
+        </div>
+
+        {/* Instructions */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mt-16 text-center"
+        >
+          <p className="text-sm text-muted-foreground tracking-widest">
+            <span style={{ color: accent }}>W/S</span> NAVIGATE
+            <span className="mx-4">|</span>
+            <span style={{ color: accent }}>A/D</span> ADJUST
+            <span className="mx-4">|</span>
+            <span style={{ color: accent }}>ESC</span> BACK
+          </p>
+        </motion.div>
+      </div>
+    </motion.div>
+  )
+}

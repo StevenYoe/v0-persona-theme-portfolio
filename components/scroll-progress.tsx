@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { useGameStore } from '@/lib/store'
 
@@ -8,29 +8,21 @@ const sections = [
   { id: 'hero', label: 'HOME' },
   { id: 'about', label: 'ABOUT' },
   { id: 'skills', label: 'SKILLS' },
-  { id: 'work', label: 'WORK' },
+  { id: 'experience', label: 'EXPERIENCE' },
+  { id: 'projects', label: 'PROJECTS' },
   { id: 'contact', label: 'CONTACT' },
 ]
 
 export function ScrollProgress() {
   const theme = useGameStore((state) => state.theme)
-  const { scrollYProgress } = useScroll()
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
   const [activeSection, setActiveSection] = useState(0)
-  const [scrollPercent, setScrollPercent] = useState(0)
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
   // Track active section
   useEffect(() => {
     const handleScroll = () => {
-      const scrollY = window.scrollY
       const windowHeight = window.innerHeight
-      const documentHeight = document.documentElement.scrollHeight
-      
-      // Calculate scroll percentage
-      const percent = Math.round((scrollY / (documentHeight - windowHeight)) * 100)
-      setScrollPercent(Math.min(100, Math.max(0, percent)))
 
       // Find active section
       sections.forEach((section, index) => {
@@ -50,25 +42,8 @@ export function ScrollProgress() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Progress for section indicator
-  const sectionProgress = useTransform(
-    scrollYProgress, 
-    [0, 1], 
-    [0, (sections.length - 1)]
-  )
-
   return (
     <>
-      {/* Top progress bar with theme-specific styling */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-1 z-[60] origin-left"
-        style={{ 
-          backgroundColor: accent,
-          scaleX,
-          boxShadow: theme === 'persona-3' ? `0 0 10px ${accent}, 0 0 20px ${accent}` : 'none'
-        }}
-      />
-
       {/* Side progress indicator */}
       <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden xl:flex flex-col items-center gap-3">
         {/* Section dots */}
@@ -123,14 +98,6 @@ export function ScrollProgress() {
             </motion.button>
           )
         })}
-
-        {/* Scroll percentage */}
-        <motion.div
-          className="mt-6 font-display text-xs tracking-wider"
-          style={{ color: accent }}
-        >
-          {scrollPercent}%
-        </motion.div>
       </div>
 
       {/* Mobile bottom indicator */}

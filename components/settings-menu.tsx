@@ -22,7 +22,8 @@ interface SettingItem {
 
 const settingItems: SettingItem[] = [
   { id: 'theme', label: 'THEME', type: 'theme' },
-  { id: 'parallax', label: 'PARALLAX INTENSITY', type: 'slider' },
+  { id: 'music', label: 'MUSIC VOLUME', type: 'slider' },
+  { id: 'sfx', label: 'SFX VOLUME', type: 'slider' },
   { id: 'cursor', label: 'CUSTOM CURSOR', type: 'toggle' },
   { id: 'back', label: 'BACK', type: 'toggle' },
 ]
@@ -31,8 +32,10 @@ export function SettingsMenu() {
   const theme = useGameStore((state) => state.theme)
   const setTheme = useGameStore((state) => state.setTheme)
   const goBack = useGameStore((state) => state.goBack)
-  const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
-  const setParallaxIntensity = useGameStore((state) => state.setParallaxIntensity)
+  const musicVolume = useGameStore((state) => state.musicVolume)
+  const setMusicVolume = useGameStore((state) => state.setMusicVolume)
+  const sfxVolume = useGameStore((state) => state.sfxVolume)
+  const setSfxVolume = useGameStore((state) => state.setSfxVolume)
   const cursorEnabled = useGameStore((state) => state.cursorEnabled)
   const toggleCursor = useGameStore((state) => state.toggleCursor)
   
@@ -56,11 +59,18 @@ export function SettingsMenu() {
           setTheme(themeOptions[newIndex].id)
         }
         break
-      case 'parallax':
+      case 'music':
         if (direction === 'left') {
-          setParallaxIntensity(Math.max(0, parallaxIntensity - 0.25))
+          setMusicVolume(Math.max(0, musicVolume - 10))
         } else if (direction === 'right') {
-          setParallaxIntensity(Math.min(2, parallaxIntensity + 0.25))
+          setMusicVolume(Math.min(100, musicVolume + 10))
+        }
+        break
+      case 'sfx':
+        if (direction === 'left') {
+          setSfxVolume(Math.max(0, sfxVolume - 10))
+        } else if (direction === 'right') {
+          setSfxVolume(Math.min(100, sfxVolume + 10))
         }
         break
       case 'cursor':
@@ -70,7 +80,7 @@ export function SettingsMenu() {
         goBack()
         break
     }
-  }, [themeIndex, setTheme, parallaxIntensity, setParallaxIntensity, toggleCursor, goBack])
+  }, [themeIndex, setTheme, musicVolume, setMusicVolume, sfxVolume, setSfxVolume, toggleCursor, goBack])
 
   // Keyboard navigation
   useEffect(() => {
@@ -242,20 +252,20 @@ export function SettingsMenu() {
                       </div>
                     )}
 
-                    {item.id === 'parallax' && (
+                    {item.id === 'music' && (
                       <div className="flex items-center gap-4 w-64">
                         <button
-                          onClick={() => handleAction('parallax', 'left')}
+                          onClick={() => handleAction('music', 'left')}
                           className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
                           style={{ color: accent }}
                         >
                           {'<'}
                         </button>
                         <Slider
-                          value={[parallaxIntensity * 50]}
+                          value={[musicVolume]}
                           max={100}
-                          step={12.5}
-                          onValueChange={(value) => setParallaxIntensity(value[0] / 50)}
+                          step={10}
+                          onValueChange={(value) => setMusicVolume(value[0])}
                           className="flex-1"
                           style={{ 
                             '--slider-track': `${accent}30`,
@@ -264,7 +274,7 @@ export function SettingsMenu() {
                           } as React.CSSProperties}
                         />
                         <button
-                          onClick={() => handleAction('parallax', 'right')}
+                          onClick={() => handleAction('music', 'right')}
                           className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
                           style={{ color: accent }}
                         >
@@ -274,7 +284,44 @@ export function SettingsMenu() {
                           className="font-display text-lg w-12 text-right"
                           style={{ color: accent }}
                         >
-                          {Math.round(parallaxIntensity * 100)}%
+                          {musicVolume}%
+                        </span>
+                      </div>
+                    )}
+
+                    {item.id === 'sfx' && (
+                      <div className="flex items-center gap-4 w-64">
+                        <button
+                          onClick={() => handleAction('sfx', 'left')}
+                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          style={{ color: accent }}
+                        >
+                          {'<'}
+                        </button>
+                        <Slider
+                          value={[sfxVolume]}
+                          max={100}
+                          step={10}
+                          onValueChange={(value) => setSfxVolume(value[0])}
+                          className="flex-1"
+                          style={{ 
+                            '--slider-track': `${accent}30`,
+                            '--slider-range': accent,
+                            '--slider-thumb': accent
+                          } as React.CSSProperties}
+                        />
+                        <button
+                          onClick={() => handleAction('sfx', 'right')}
+                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          style={{ color: accent }}
+                        >
+                          {'>'}
+                        </button>
+                        <span 
+                          className="font-display text-lg w-12 text-right"
+                          style={{ color: accent }}
+                        >
+                          {sfxVolume}%
                         </span>
                       </div>
                     )}

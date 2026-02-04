@@ -7,7 +7,6 @@ import { ParallaxSection, FloatingElement } from './parallax-section'
 
 export function AboutSection() {
   const theme = useGameStore((state) => state.theme)
-  const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
   const containerRef = useRef<HTMLDivElement>(null)
   
   const { scrollYProgress } = useScroll({
@@ -15,15 +14,14 @@ export function AboutSection() {
     offset: ["start end", "end start"]
   })
 
-  const springConfig = { stiffness: 50, damping: 20 }
+  const springConfig = { stiffness: 100, damping: 30 }
   
-  // Multiple parallax layers
-  const x1 = useSpring(useTransform(scrollYProgress, [0, 1], [-300 * parallaxIntensity, 300 * parallaxIntensity]), springConfig)
-  const x2 = useSpring(useTransform(scrollYProgress, [0, 1], [300 * parallaxIntensity, -300 * parallaxIntensity]), springConfig)
-  const y1 = useSpring(useTransform(scrollYProgress, [0, 1], [100 * parallaxIntensity, -100 * parallaxIntensity]), springConfig)
-  const y2 = useSpring(useTransform(scrollYProgress, [0, 1], [-50 * parallaxIntensity, 50 * parallaxIntensity]), springConfig)
-  const rotate = useSpring(useTransform(scrollYProgress, [0, 1], [-5 * parallaxIntensity, 5 * parallaxIntensity]), springConfig)
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.9, 1, 0.9])
+  // Smooth parallax layers
+  const x1 = useSpring(useTransform(scrollYProgress, [0, 1], [-200, 200]), springConfig)
+  const x2 = useSpring(useTransform(scrollYProgress, [0, 1], [200, -200]), springConfig)
+  const y1 = useSpring(useTransform(scrollYProgress, [0, 1], [80, -80]), springConfig)
+  const y2 = useSpring(useTransform(scrollYProgress, [0, 1], [-40, 40]), springConfig)
+  const rotate = useSpring(useTransform(scrollYProgress, [0, 1], [-3, 3]), springConfig)
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
@@ -34,6 +32,14 @@ export function AboutSection() {
     { number: '100%', label: 'Dedication' },
   ]
 
+  const handleDownloadCV = () => {
+    // Create a sample CV download
+    const link = document.createElement('a')
+    link.href = '/cv.pdf'
+    link.download = 'CV_YourName.pdf'
+    link.click()
+  }
+
   return (
     <section 
       ref={containerRef}
@@ -41,7 +47,7 @@ export function AboutSection() {
     >
       {/* Deep background layer */}
       <motion.div 
-        style={{ y: y2, scale }}
+        style={{ y: y2 }}
         className="absolute inset-0 pointer-events-none"
       >
         {theme === 'persona-5' && (
@@ -286,12 +292,46 @@ export function AboutSection() {
                 </p>
               </motion.div>
 
+              {/* Download CV Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5 }}
+              >
+                <motion.button
+                  onClick={handleDownloadCV}
+                  whileHover={{ scale: 1.05, x: 10 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-8 py-4 font-display text-xl tracking-wider transition-colors flex items-center gap-3 ${
+                    theme === 'persona-5' ? '-skew-x-6' : theme === 'persona-3' ? 'rounded-lg' : ''
+                  }`}
+                  style={{ 
+                    backgroundColor: accent,
+                    color: theme === 'persona-4' ? '#1a1510' : '#fff',
+                    boxShadow: theme === 'persona-3' ? `0 0 20px ${accent}60` : 'none'
+                  }}
+                >
+                  <span className={theme === 'persona-5' ? 'skew-x-6' : ''}>DOWNLOAD CV</span>
+                  <motion.svg
+                    className={`w-5 h-5 ${theme === 'persona-5' ? 'skew-x-6' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    animate={{ y: [0, 3, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </motion.svg>
+                </motion.button>
+              </motion.div>
+
               {/* Stats with enhanced parallax */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.6 }}
                 className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8"
               >
                 {stats.map((stat, i) => (
@@ -300,7 +340,7 @@ export function AboutSection() {
                     initial={{ opacity: 0, scale: 0.8, y: 20 }}
                     whileInView={{ opacity: 1, scale: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.6 + i * 0.1 }}
+                    transition={{ delay: 0.7 + i * 0.1 }}
                     whileHover={{ 
                       scale: 1.05,
                       borderColor: accent,
@@ -316,7 +356,7 @@ export function AboutSection() {
                       initial={{ scale: 0 }}
                       whileInView={{ scale: 1 }}
                       viewport={{ once: true }}
-                      transition={{ delay: 0.7 + i * 0.1, type: "spring" }}
+                      transition={{ delay: 0.8 + i * 0.1, type: "spring" }}
                     >
                       {stat.number}
                     </motion.div>

@@ -16,6 +16,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# bun
+.bun
+node_modules.bun
+
 # env files
 .env*
 

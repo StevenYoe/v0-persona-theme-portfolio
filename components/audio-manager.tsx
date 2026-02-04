@@ -3,115 +3,251 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useGameStore } from '@/lib/store'
 
-// Web Audio API based audio generation for different themes
-const createOscillator = (
-  audioContext: AudioContext, 
-  frequency: number, 
-  type: OscillatorType,
-  duration: number,
-  volume: number
-) => {
-  const oscillator = audioContext.createOscillator()
-  const gainNode = audioContext.createGain()
-  
-  oscillator.connect(gainNode)
-  gainNode.connect(audioContext.destination)
-  
-  oscillator.frequency.value = frequency
-  oscillator.type = type
-  gainNode.gain.value = volume
-  
-  oscillator.start()
-  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration)
-  oscillator.stop(audioContext.currentTime + duration)
+// Audio file path resolver
+const getAudioPath = (theme: 'persona-3' | 'persona-4' | 'persona-5', filename: string): string => {
+  const themeFolder = theme === 'persona-3' ? 'p3' : theme === 'persona-4' ? 'p4' : 'p5'
+  return `/audio/${themeFolder}/${filename}`
 }
 
-// Background music generator using Web Audio API
-class BGMGenerator {
-  private audioContext: AudioContext | null = null
-  private isPlaying = false
-  private intervalId: NodeJS.Timeout | null = null
+// Audio Player class using HTML5 Audio API
+class AudioPlayer {
+  private currentBGM: HTMLAudioElement | null = null
+  private nextBGM: HTMLAudioElement | null = null
+  private audioCache: Map<string, HTMLAudioElement> = new Map()
+  private fadeInterval: NodeJS.Timeout | null = null
   private volume = 0.8
   private theme: 'persona-3' | 'persona-4' | 'persona-5' = 'persona-5'
   private location: 'menu' | 'portfolio' = 'menu'
+  private isPlaying = false
 
-  init() {
-    if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
-    }
-    return this.audioContext
+  // Initialize and preload audio
+  init(theme: 'persona-3' | 'persona-4' | 'persona-5', location: 'menu' | 'portfolio') {
+    this.theme = theme
+    this.location = location
+    this.preloadAudio(theme, location)
   }
 
+  // Preload audio files for a specific theme and location
+  private preloadAudio(theme: 'persona-3' | 'persona-4' | 'persona-5', location: 'menu' | 'portfolio') {
+    const filename = location === 'menu' ? 'menu-bgm.mp3' : 'portfolio-bgm.mp3'
+    const path = getAudioPath(theme, filename)
+
+    if (!this.audioCache.has(path)) {
+      const audio = new Audio(path)
+      audio.loop = true
+      audio.preload = 'auto'
+      audio.volume = 0
+      this.audioCache.set(path, audio)
+    }
+  }
+
+  // Preload all audio files for better performance
+  preloadAll() {
+    const themes: ('persona-3' | 'persona-4' | 'persona-5')[] = ['persona-3', 'persona-4', 'persona-5']
+    const locations: ('menu' | 'portfolio')[] = ['menu', 'portfolio']
+
+    themes.forEach(theme => {
+      locations.forEach(location => {
+        this.preloadAudio(theme, location)
+      })
+    })
+  }
+
+  // Set volume (0-100)
   setVolume(vol: number) {
     this.volume = vol / 100
+    if (this.currentBGM) {
+      this.currentBGM.volume = this.volume
+    }
   }
 
+  // Set theme and switch audio if needed
   setTheme(theme: 'persona-3' | 'persona-4' | 'persona-5') {
+    if (this.theme === theme) return
     this.theme = theme
     if (this.isPlaying) {
-      this.stop()
-      this.play()
+      this.switchTrack()
     }
   }
 
+  // Set location and switch audio if needed
   setLocation(location: 'menu' | 'portfolio') {
-    const changed = this.location !== location
+    if (this.location === location) return
     this.location = location
-    if (changed && this.isPlaying) {
-      this.stop()
-      this.play()
+    if (this.isPlaying) {
+      this.switchTrack()
     }
   }
 
+  // Play current track
   play() {
-    if (this.isPlaying || !this.audioContext) return
-    this.isPlaying = true
-    
-    // Generate ambient music based on theme and location
-    const playNote = () => {
-      if (!this.audioContext || !this.isPlaying) return
-      
-      // Different music patterns for menu vs portfolio
-      const menuPatterns = {
-        'persona-3': { freqs: [220, 262, 330, 392], type: 'sine' as OscillatorType, tempo: 800 },
-        'persona-4': { freqs: [196, 247, 294, 370], type: 'triangle' as OscillatorType, tempo: 600 },
-        'persona-5': { freqs: [185, 233, 277, 349], type: 'sawtooth' as OscillatorType, tempo: 500 },
-      }
-      
-      const portfolioPatterns = {
-        'persona-3': { freqs: [330, 392, 440, 523], type: 'sine' as OscillatorType, tempo: 700 },
-        'persona-4': { freqs: [294, 370, 440, 554], type: 'triangle' as OscillatorType, tempo: 550 },
-        'persona-5': { freqs: [277, 349, 415, 523], type: 'square' as OscillatorType, tempo: 450 },
-      }
-      
-      const patterns = this.location === 'menu' ? menuPatterns : portfolioPatterns
-      const pattern = patterns[this.theme]
-      const freq = pattern.freqs[Math.floor(Math.random() * pattern.freqs.length)]
-      
-      createOscillator(this.audioContext, freq, pattern.type, 0.8, this.volume * 0.05)
-      
-      // Add bass note
-      if (Math.random() > 0.6) {
-        createOscillator(this.audioContext, freq / 2, 'sine', 1.2, this.volume * 0.03)
-      }
-      
-      this.intervalId = setTimeout(playNote, pattern.tempo + Math.random() * 200)
+    if (this.isPlaying) return
+
+    const filename = this.location === 'menu' ? 'menu-bgm.mp3' : 'portfolio-bgm.mp3'
+    const path = getAudioPath(this.theme, filename)
+
+    // Get or create audio element
+    let audio = this.audioCache.get(path)
+    if (!audio) {
+      audio = new Audio(path)
+      audio.loop = true
+      audio.preload = 'auto'
+      this.audioCache.set(path, audio)
     }
-    
-    playNote()
+
+    this.currentBGM = audio
+    this.currentBGM.volume = 0
+
+    // Start playing and fade in
+    const playPromise = this.currentBGM.play()
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        this.fadeIn(this.currentBGM!)
+      }).catch(error => {
+        console.warn('Audio playback failed:', error)
+      })
+    }
+
+    this.isPlaying = true
   }
 
+  // Stop current track
   stop() {
-    this.isPlaying = false
-    if (this.intervalId) {
-      clearTimeout(this.intervalId)
-      this.intervalId = null
+    if (!this.currentBGM) return
+
+    this.fadeOut(this.currentBGM, () => {
+      if (this.currentBGM) {
+        this.currentBGM.pause()
+        this.currentBGM.currentTime = 0
+      }
+      this.isPlaying = false
+    })
+  }
+
+  // Switch to a different track with crossfade
+  private switchTrack() {
+    const filename = this.location === 'menu' ? 'menu-bgm.mp3' : 'portfolio-bgm.mp3'
+    const path = getAudioPath(this.theme, filename)
+
+    // Get or create new audio element
+    let newAudio = this.audioCache.get(path)
+    if (!newAudio) {
+      newAudio = new Audio(path)
+      newAudio.loop = true
+      newAudio.preload = 'auto'
+      this.audioCache.set(path, newAudio)
     }
+
+    // If same track, do nothing
+    if (this.currentBGM && this.currentBGM === newAudio) return
+
+    this.nextBGM = newAudio
+    this.nextBGM.volume = 0
+
+    // Start new track
+    const playPromise = this.nextBGM.play()
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Crossfade
+        this.crossfade()
+      }).catch(error => {
+        console.warn('Audio playback failed:', error)
+      })
+    }
+  }
+
+  // Fade in audio
+  private fadeIn(audio: HTMLAudioElement, duration = 500) {
+    if (this.fadeInterval) clearInterval(this.fadeInterval)
+
+    const steps = 20
+    const stepDuration = duration / steps
+    const volumeStep = this.volume / steps
+    let currentStep = 0
+
+    this.fadeInterval = setInterval(() => {
+      currentStep++
+      audio.volume = Math.min(volumeStep * currentStep, this.volume)
+
+      if (currentStep >= steps) {
+        if (this.fadeInterval) clearInterval(this.fadeInterval)
+        this.fadeInterval = null
+      }
+    }, stepDuration)
+  }
+
+  // Fade out audio
+  private fadeOut(audio: HTMLAudioElement, onComplete?: () => void, duration = 500) {
+    if (this.fadeInterval) clearInterval(this.fadeInterval)
+
+    const steps = 20
+    const stepDuration = duration / steps
+    const volumeStep = audio.volume / steps
+    let currentStep = 0
+
+    this.fadeInterval = setInterval(() => {
+      currentStep++
+      audio.volume = Math.max(audio.volume - volumeStep, 0)
+
+      if (currentStep >= steps) {
+        if (this.fadeInterval) clearInterval(this.fadeInterval)
+        this.fadeInterval = null
+        if (onComplete) onComplete()
+      }
+    }, stepDuration)
+  }
+
+  // Crossfade between current and next track
+  private crossfade(duration = 500) {
+    if (!this.currentBGM || !this.nextBGM) return
+
+    const oldAudio = this.currentBGM
+    const newAudio = this.nextBGM
+
+    // Fade out old, fade in new
+    this.fadeOut(oldAudio, () => {
+      oldAudio.pause()
+      oldAudio.currentTime = 0
+    }, duration)
+
+    this.fadeIn(newAudio, duration)
+
+    // Switch references
+    this.currentBGM = newAudio
+    this.nextBGM = null
+  }
+
+  // Play sound effect
+  playSFX(sfxType: 'hover' | 'select', volume: number) {
+    const filename = sfxType === 'hover' ? 'hover.mp3' : 'select.mp3'
+    const path = getAudioPath(this.theme, filename)
+
+    // Create new audio instance for SFX (allows multiple simultaneous plays)
+    const sfx = new Audio(path)
+    sfx.volume = volume / 100
+    const playPromise = sfx.play()
+
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        // Silently fail for SFX if file doesn't exist yet
+        console.debug('SFX playback failed:', error)
+      })
+    }
+  }
+
+  // Cleanup
+  destroy() {
+    this.stop()
+    this.audioCache.forEach(audio => {
+      audio.pause()
+      audio.src = ''
+    })
+    this.audioCache.clear()
   }
 }
 
-// Global BGM instance
-let bgmGenerator: BGMGenerator | null = null
+// Global audio player instance
+let audioPlayer: AudioPlayer | null = null
 
 export function AudioManager() {
   const theme = useGameStore((state) => state.theme)
@@ -120,101 +256,69 @@ export function AudioManager() {
   const musicEnabled = useGameStore((state) => state.musicEnabled)
   const sfxEnabled = useGameStore((state) => state.sfxEnabled)
   const musicLocation = useGameStore((state) => state.musicLocation)
-  
+
   const isInitialized = useRef(false)
 
   // Initialize audio on first user interaction
   const initAudio = useCallback(() => {
     if (isInitialized.current) return
-    
-    if (!bgmGenerator) {
-      bgmGenerator = new BGMGenerator()
+
+    if (!audioPlayer) {
+      audioPlayer = new AudioPlayer()
     }
-    bgmGenerator.init()
+    audioPlayer.init(theme, musicLocation)
+    audioPlayer.preloadAll() // Preload all audio files
     isInitialized.current = true
-    
+
     if (musicEnabled) {
-      bgmGenerator.setVolume(musicVolume)
-      bgmGenerator.setTheme(theme)
-      bgmGenerator.setLocation(musicLocation)
-      bgmGenerator.play()
+      audioPlayer.setVolume(musicVolume)
+      audioPlayer.play()
     }
   }, [musicEnabled, musicVolume, theme, musicLocation])
 
   // Update theme
   useEffect(() => {
-    if (bgmGenerator && isInitialized.current) {
-      bgmGenerator.setTheme(theme)
+    if (audioPlayer && isInitialized.current) {
+      audioPlayer.setTheme(theme)
     }
   }, [theme])
 
   // Update music location
   useEffect(() => {
-    if (bgmGenerator && isInitialized.current) {
-      bgmGenerator.setLocation(musicLocation)
+    if (audioPlayer && isInitialized.current) {
+      audioPlayer.setLocation(musicLocation)
     }
   }, [musicLocation])
 
   // Update music volume
   useEffect(() => {
-    if (bgmGenerator) {
-      bgmGenerator.setVolume(musicVolume)
+    if (audioPlayer && isInitialized.current) {
+      audioPlayer.setVolume(musicVolume)
     }
   }, [musicVolume])
 
   // Toggle music
   useEffect(() => {
-    if (!bgmGenerator || !isInitialized.current) return
-    
+    if (!audioPlayer || !isInitialized.current) return
+
     if (musicEnabled) {
-      bgmGenerator.play()
+      audioPlayer.play()
     } else {
-      bgmGenerator.stop()
+      audioPlayer.stop()
     }
   }, [musicEnabled])
 
   // Play hover sound effect
   const playHoverSfx = useCallback(() => {
-    if (!sfxEnabled || !isInitialized.current) return
-    
-    const audioContext = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
-    
-    const frequencies = {
-      'persona-3': 800,
-      'persona-4': 600,
-      'persona-5': 1000,
-    }
-    
-    createOscillator(audioContext, frequencies[theme], 'sine', 0.1, (sfxVolume / 100) * 0.1)
-  }, [sfxEnabled, theme, sfxVolume])
+    if (!sfxEnabled || !isInitialized.current || !audioPlayer) return
+    audioPlayer.playSFX('hover', sfxVolume)
+  }, [sfxEnabled, sfxVolume])
 
   // Play select sound effect
   const playSelectSfx = useCallback(() => {
-    if (!sfxEnabled || !isInitialized.current) return
-    
-    const audioContext = new (window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
-    
-    const frequencies = {
-      'persona-3': [400, 600, 800],
-      'persona-4': [300, 500, 700],
-      'persona-5': [500, 700, 900],
-    }
-    
-    const types: Record<string, OscillatorType> = {
-      'persona-3': 'sine',
-      'persona-4': 'triangle',
-      'persona-5': 'square',
-    }
-    
-    const freqs = frequencies[theme]
-    const type = types[theme]
-    
-    freqs.forEach((freq, i) => {
-      setTimeout(() => {
-        createOscillator(audioContext, freq, type, 0.15, (sfxVolume / 100) * 0.12)
-      }, i * 50)
-    })
-  }, [sfxEnabled, theme, sfxVolume])
+    if (!sfxEnabled || !isInitialized.current || !audioPlayer) return
+    audioPlayer.playSFX('select', sfxVolume)
+  }, [sfxEnabled, sfxVolume])
 
   // Initialize on first user interaction
   useEffect(() => {
@@ -223,10 +327,10 @@ export function AudioManager() {
       window.removeEventListener('click', handleFirstInteraction)
       window.removeEventListener('keydown', handleFirstInteraction)
     }
-    
+
     window.addEventListener('click', handleFirstInteraction)
     window.addEventListener('keydown', handleFirstInteraction)
-    
+
     return () => {
       window.removeEventListener('click', handleFirstInteraction)
       window.removeEventListener('keydown', handleFirstInteraction)
@@ -261,8 +365,8 @@ export function AudioManager() {
   // Cleanup
   useEffect(() => {
     return () => {
-      if (bgmGenerator) {
-        bgmGenerator.stop()
+      if (audioPlayer) {
+        audioPlayer.destroy()
       }
     }
   }, [])

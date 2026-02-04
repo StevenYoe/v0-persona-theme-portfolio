@@ -1,17 +1,41 @@
 "use client"
 
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useGameStore } from '@/lib/store'
 import { ParallaxSection, FloatingElement } from './parallax-section'
 
 const skills = [
-  { name: 'React / Next.js', level: 95 },
-  { name: 'TypeScript', level: 90 },
-  { name: 'UI/UX Design', level: 85 },
-  { name: 'Node.js', level: 80 },
-  { name: 'Three.js / WebGL', level: 75 },
-  { name: 'Motion Design', level: 85 },
+  { 
+    name: 'React / Next.js', 
+    icon: '⚛',
+    description: 'Building modern web applications with server-side rendering and static generation'
+  },
+  { 
+    name: 'TypeScript', 
+    icon: 'TS',
+    description: 'Type-safe development for scalable and maintainable codebases'
+  },
+  { 
+    name: 'UI/UX Design', 
+    icon: '◈',
+    description: 'Creating intuitive and beautiful user interfaces with attention to detail'
+  },
+  { 
+    name: 'Node.js', 
+    icon: '⬢',
+    description: 'Backend development with Express, REST APIs, and server architecture'
+  },
+  { 
+    name: 'Three.js / WebGL', 
+    icon: '△',
+    description: '3D graphics and immersive web experiences'
+  },
+  { 
+    name: 'Motion Design', 
+    icon: '◎',
+    description: 'Fluid animations and micro-interactions for delightful UX'
+  },
 ]
 
 const tools = [
@@ -23,6 +47,7 @@ export function SkillsSection() {
   const theme = useGameStore((state) => state.theme)
   const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null)
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -175,61 +200,76 @@ export function SkillsSection() {
         </ParallaxSection>
 
         <div className="grid lg:grid-cols-2 gap-16">
-          {/* Skills bars with parallax */}
+          {/* Skills cards */}
           <ParallaxSection speed={0.3} direction="up">
-            <div className="space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {skills.map((skill, i) => (
                 <motion.div
                   key={skill.name}
-                  initial={{ opacity: 0, x: -50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
+                  onMouseEnter={() => setHoveredSkill(skill.name)}
+                  onMouseLeave={() => setHoveredSkill(null)}
+                  className={`relative p-5 border cursor-default transition-all duration-300 ${
+                    theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''
+                  }`}
+                  style={{ 
+                    borderColor: hoveredSkill === skill.name ? accent : accent + '30',
+                    backgroundColor: hoveredSkill === skill.name ? accent + '10' : 'var(--secondary)'
+                  }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    y: -5
+                  }}
                 >
-                  <div className="flex justify-between mb-2">
-                    <span className="font-display text-xl tracking-wider">
-                      {skill.name}
-                    </span>
-                    <motion.span 
-                      style={{ color: accent }} 
-                      className="font-display text-xl"
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.5 + i * 0.1 }}
-                    >
-                      {skill.level}%
-                    </motion.span>
-                  </div>
-                  <div 
-                    className={`h-3 bg-secondary overflow-hidden ${
-                      theme === 'persona-3' ? 'rounded-full' : ''
+                  {/* Icon */}
+                  <motion.div
+                    className={`w-10 h-10 flex items-center justify-center mb-3 ${
+                      theme === 'persona-5' ? 'skew-x-3' : ''
                     }`}
                     style={{ 
-                      transform: theme === 'persona-5' ? 'skewX(-12deg)' : 'none'
+                      backgroundColor: accent + '20',
+                      borderRadius: theme === 'persona-3' ? '50%' : theme === 'persona-5' ? '0' : '4px'
+                    }}
+                    animate={{
+                      boxShadow: hoveredSkill === skill.name 
+                        ? `0 0 20px ${accent}40` 
+                        : `0 0 0px ${accent}00`
                     }}
                   >
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${skill.level}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.2, delay: 0.3 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                      className={`h-full relative ${theme === 'persona-3' ? 'rounded-full' : ''}`}
-                      style={{ backgroundColor: accent }}
+                    <span 
+                      className="font-display text-lg"
+                      style={{ color: accent }}
                     >
-                      {/* Shine effect */}
-                      <motion.div
-                        className="absolute inset-0 opacity-50"
-                        initial={{ x: '-100%' }}
-                        whileInView={{ x: '100%' }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: 0.8 + i * 0.1 }}
-                        style={{
-                          background: `linear-gradient(90deg, transparent, white, transparent)`
-                        }}
-                      />
-                    </motion.div>
+                      {skill.icon}
+                    </span>
+                  </motion.div>
+
+                  {/* Content */}
+                  <div className={theme === 'persona-5' ? 'skew-x-3' : ''}>
+                    <h3 
+                      className="font-display text-lg tracking-wider mb-1"
+                      style={{ color: hoveredSkill === skill.name ? accent : 'var(--foreground)' }}
+                    >
+                      {skill.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {skill.description}
+                    </p>
                   </div>
+
+                  {/* Corner accent */}
+                  <motion.div
+                    className="absolute top-0 right-0 w-8 h-8"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: hoveredSkill === skill.name ? 1 : 0 }}
+                    style={{
+                      backgroundColor: accent,
+                      clipPath: 'polygon(100% 0, 100% 100%, 0 0)'
+                    }}
+                  />
                 </motion.div>
               ))}
             </div>

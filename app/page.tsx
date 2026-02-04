@@ -11,11 +11,12 @@ import { Navigation } from '@/components/navigation'
 import { HeroSection } from '@/components/hero-section'
 import { AboutSection } from '@/components/about-section'
 import { SkillsSection } from '@/components/skills-section'
+import { ExperienceSection } from '@/components/experience-section'
 import { ProjectsSection } from '@/components/projects-section'
 import { ContactSection } from '@/components/contact-section'
 import { CustomCursor } from '@/components/custom-cursor'
-import { ScrollProgress } from '@/components/scroll-progress'
 import { TransitionWrapper } from '@/components/transition-wrapper'
+import { AudioManager } from '@/components/audio-manager'
 
 export default function Home() {
   const currentScreen = useGameStore((state) => state.currentScreen)
@@ -43,6 +44,7 @@ export default function Home() {
   return (
     <LenisProvider>
       <CustomCursor />
+      <AudioManager />
       
       <AnimatePresence mode="wait">
         {/* Main Menu */}
@@ -58,7 +60,6 @@ export default function Home() {
         {/* Portfolio (Main Content) */}
         {(currentScreen === 'portfolio' || currentScreen === 'pause-menu') && (
           <main key="portfolio" className="relative">
-            <ScrollProgress />
             <Navigation />
             
             <TransitionWrapper>
@@ -74,7 +75,11 @@ export default function Home() {
                 <SkillsSection />
               </div>
               
-              <div id="work">
+              <div id="experience">
+                <ExperienceSection />
+              </div>
+              
+              <div id="projects">
                 <ProjectsSection />
               </div>
               

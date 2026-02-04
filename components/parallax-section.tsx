@@ -27,37 +27,41 @@ export function ParallaxSection({
 }: ParallaxSectionProps) {
   const ref = useRef<HTMLDivElement>(null)
   const theme = useGameStore((state) => state.theme)
-  const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
   
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"]
   })
 
-  const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 }
-  const adjustedSpeed = speed * parallaxIntensity
+  // Smoother spring config - increased damping for less choppy motion
+  const springConfig = { stiffness: 50, damping: 30, mass: 1, restDelta: 0.001 }
   
-  // Direction-based transforms
-  const yRange = direction === 'up' ? [0, -300 * adjustedSpeed] : 
-                 direction === 'down' ? [0, 300 * adjustedSpeed] : [0, 0]
-  const xRange = direction === 'left' ? [0, -300 * adjustedSpeed] : 
-                 direction === 'right' ? [0, 300 * adjustedSpeed] : [0, 0]
+  // Direction-based transforms with reduced intensity
+  const yRange = direction === 'up' ? [0, -150 * speed] : 
+                 direction === 'down' ? [0, 150 * speed] : [0, 0]
+  const xRange = direction === 'left' ? [0, -150 * speed] : 
+                 direction === 'right' ? [0, 150 * speed] : [0, 0]
 
-  const y = useSpring(useTransform(scrollYProgress, [0, 1], yRange), springConfig)
-  const x = useSpring(useTransform(scrollYProgress, [0, 1], xRange), springConfig)
+  const rawY = useTransform(scrollYProgress, [0, 1], yRange)
+  const rawX = useTransform(scrollYProgress, [0, 1], xRange)
   
-  const opacityInput = fadeOnScroll ? [0, 0.2, 0.8, 1] : [0, 0, 1, 1]
+  // Apply spring for smooth interpolation
+  const y = useSpring(rawY, springConfig)
+  const x = useSpring(rawX, springConfig)
+  
+  const opacityInput = fadeOnScroll ? [0, 0.15, 0.85, 1] : [0, 0, 1, 1]
   const opacityOutput = fadeOnScroll ? [0, 1, 1, 0] : [1, 1, 1, 1]
   const opacity = useTransform(scrollYProgress, opacityInput, opacityOutput)
   
-  const scaleInput = scaleOnScroll ? [0, 0.2, 0.8, 1] : [0, 0, 1, 1]
-  const scaleOutput = scaleOnScroll ? [0.8, 1, 1, 0.8] : [1, 1, 1, 1]
+  const scaleInput = scaleOnScroll ? [0, 0.15, 0.85, 1] : [0, 0, 1, 1]
+  const scaleOutput = scaleOnScroll ? [0.95, 1, 1, 0.95] : [1, 1, 1, 1]
   const scale = useTransform(scrollYProgress, scaleInput, scaleOutput)
   
   const rotationOutput = rotateOnScroll && theme === 'persona-5' 
-    ? [-3 * parallaxIntensity, 3 * parallaxIntensity] 
+    ? [-2, 2] 
     : [0, 0]
-  const rotation = useTransform(scrollYProgress, [0, 1], rotationOutput)
+  const rawRotation = useTransform(scrollYProgress, [0, 1], rotationOutput)
+  const rotation = useSpring(rawRotation, springConfig)
 
   return (
     <motion.div
@@ -84,18 +88,21 @@ export function ParallaxLayer({
   depth = 0.5,
   scrollProgress
 }: ParallaxLayerProps) {
-  const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
+  // Smoother spring config
+  const springConfig = { stiffness: 30, damping: 30, mass: 1 }
   
-  const y = useTransform(
+  const rawY = useTransform(
     scrollProgress, 
     [0, 1], 
-    [0, -500 * depth * parallaxIntensity]
+    [0, -300 * depth]
   )
+  
+  const y = useSpring(rawY, springConfig)
   
   const scale = useTransform(
     scrollProgress, 
     [0, 1], 
-    [1 + (depth * 0.2 * parallaxIntensity), 1]
+    [1 + (depth * 0.1), 1]
   )
 
   return (
@@ -108,7 +115,7 @@ export function ParallaxLayer({
   )
 }
 
-// Floating element with parallax
+// Floating element with parallax - smoother animation
 interface FloatingElementProps {
   children: ReactNode
   className?: string
@@ -124,16 +131,14 @@ export function FloatingElement({
   rotateIntensity = 5,
   delay = 0
 }: FloatingElementProps) {
-  const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
-  
   return (
     <motion.div
       animate={{
-        y: [0, -floatIntensity * parallaxIntensity, 0],
+        y: [0, -floatIntensity, 0],
         rotate: [-rotateIntensity, rotateIntensity, -rotateIntensity],
       }}
       transition={{
-        duration: 6,
+        duration: 8, // Slower, smoother duration
         delay,
         repeat: Infinity,
         ease: "easeInOut"
@@ -158,10 +163,11 @@ export function MouseParallax({
   intensity = 0.02
 }: MouseParallaxProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
   
-  const x = useSpring(0, { stiffness: 100, damping: 30 })
-  const y = useSpring(0, { stiffness: 100, damping: 30 })
+  // Smoother spring for mouse movement
+  const springConfig = { stiffness: 50, damping: 30 }
+  const x = useSpring(0, springConfig)
+  const y = useSpring(0, springConfig)
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!ref.current) return
@@ -169,8 +175,8 @@ export function MouseParallax({
     const centerX = rect.left + rect.width / 2
     const centerY = rect.top + rect.height / 2
     
-    x.set((e.clientX - centerX) * intensity * parallaxIntensity)
-    y.set((e.clientY - centerY) * intensity * parallaxIntensity)
+    x.set((e.clientX - centerX) * intensity)
+    y.set((e.clientY - centerY) * intensity)
   }
 
   const handleMouseLeave = () => {
@@ -238,7 +244,8 @@ function Word({
   range: [number, number]
 }) {
   const opacity = useTransform(progress, range, [0, 1])
-  const y = useTransform(progress, range, [50, 0])
+  const rawY = useTransform(progress, range, [30, 0])
+  const y = useSpring(rawY, { stiffness: 50, damping: 20 })
   
   return (
     <motion.span 

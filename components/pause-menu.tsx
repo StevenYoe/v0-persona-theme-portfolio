@@ -28,11 +28,20 @@ export function PauseMenu() {
   
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [activeTab, setActiveTab] = useState<'menu' | 'navigation'>('menu')
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [confirmSelectedIndex, setConfirmSelectedIndex] = useState(0)
 
   const isVisible = currentScreen === 'pause-menu'
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
   const currentItems = activeTab === 'menu' ? menuItems : navItems
+
+  const handleConfirmMainMenu = useCallback((confirmed: boolean) => {
+    setShowConfirmDialog(false)
+    if (confirmed) {
+      returnToMainMenu()
+    }
+  }, [returnToMainMenu])
 
   const handleSelect = useCallback((id: string) => {
     if (activeTab === 'menu') {
@@ -44,7 +53,8 @@ export function PauseMenu() {
           setScreen('settings')
           break
         case 'main-menu':
-          returnToMainMenu()
+          setShowConfirmDialog(true)
+          setConfirmSelectedIndex(0)
           break
       }
     } else {
@@ -57,7 +67,7 @@ export function PauseMenu() {
         }, 300)
       }
     }
-  }, [activeTab, closePauseMenu, setScreen, returnToMainMenu])
+  }, [activeTab, closePauseMenu, setScreen])
 
   // Reset selection when tab changes
   useEffect(() => {
@@ -68,6 +78,31 @@ export function PauseMenu() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isVisible) return
+      
+      // Handle confirm dialog navigation
+      if (showConfirmDialog) {
+        switch (e.key) {
+          case 'Escape':
+            e.preventDefault()
+            setShowConfirmDialog(false)
+            break
+          case 'ArrowLeft':
+          case 'ArrowRight':
+          case 'a':
+          case 'A':
+          case 'd':
+          case 'D':
+            e.preventDefault()
+            setConfirmSelectedIndex((prev) => (prev === 0 ? 1 : 0))
+            break
+          case 'Enter':
+          case ' ':
+            e.preventDefault()
+            handleConfirmMainMenu(confirmSelectedIndex === 0)
+            break
+        }
+        return
+      }
       
       switch (e.key) {
         case 'Escape':
@@ -108,7 +143,7 @@ export function PauseMenu() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isVisible, selectedIndex, closePauseMenu, handleSelect, currentItems])
+  }, [isVisible, selectedIndex, closePauseMenu, handleSelect, currentItems, showConfirmDialog, confirmSelectedIndex, handleConfirmMainMenu])
 
   return (
     <AnimatePresence>
@@ -333,6 +368,82 @@ export function PauseMenu() {
               </p>
             </motion.div>
           </motion.div>
+
+          {/* Confirm Dialog */}
+          <AnimatePresence>
+            {showConfirmDialog && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 flex items-center justify-center"
+              >
+                {/* Overlay */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.8 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-background"
+                  onClick={() => setShowConfirmDialog(false)}
+                />
+
+                {/* Dialog */}
+                <motion.div
+                  initial={{ scale: 0.8, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.8, y: 20 }}
+                  className={`relative z-10 p-8 md:p-12 border-2 ${
+                    theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-xl' : ''
+                  }`}
+                  style={{
+                    borderColor: accent,
+                    backgroundColor: 'var(--secondary)'
+                  }}
+                >
+                  <div className={theme === 'persona-5' ? 'skew-x-3' : ''}>
+                    <h3 
+                      className={`font-display text-2xl md:text-4xl tracking-wider mb-4 text-center ${
+                        theme === 'persona-3' ? 'neon-glow' : ''
+                      }`}
+                      style={{ color: accent }}
+                    >
+                      RETURN TO MAIN MENU?
+                    </h3>
+                    <p className="text-muted-foreground text-center mb-8 tracking-wider">
+                      Your current progress will be saved.
+                    </p>
+
+                    <div className="flex justify-center gap-4">
+                      {['YES', 'NO'].map((option, i) => {
+                        const isSelected = confirmSelectedIndex === i
+                        return (
+                          <motion.button
+                            key={option}
+                            onClick={() => handleConfirmMainMenu(option === 'YES')}
+                            onMouseEnter={() => setConfirmSelectedIndex(i)}
+                            className={`px-8 py-4 font-display text-xl tracking-wider transition-all ${
+                              theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''
+                            }`}
+                            style={{
+                              backgroundColor: isSelected ? accent : 'transparent',
+                              color: isSelected 
+                                ? (theme === 'persona-4' ? '#1a1510' : '#fff')
+                                : accent,
+                              border: `2px solid ${accent}`
+                            }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <span className={theme === 'persona-5' ? 'skew-x-3' : ''}>{option}</span>
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>

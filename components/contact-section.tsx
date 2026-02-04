@@ -20,10 +20,10 @@ const contactMethods = [
     description: 'For business inquiries'
   },
   { 
-    label: 'CALL ME', 
-    value: '+1 234 567 890', 
-    href: 'tel:+1234567890',
-    description: 'Available Mon-Fri, 9AM-6PM'
+    label: 'CHAT ON WHATSAPP', 
+    value: '+62 812 3456 7890', 
+    href: 'https://wa.me/6281234567890',
+    description: 'Fast response, available 24/7'
   },
 ]
 

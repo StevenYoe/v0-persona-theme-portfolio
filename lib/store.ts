@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 
 export type PersonaTheme = 'persona-3' | 'persona-4' | 'persona-5'
 export type GameScreen = 'main-menu' | 'portfolio' | 'settings' | 'pause-menu'
+export type MusicLocation = 'menu' | 'portfolio'
 
 interface GameState {
   // Screen management
@@ -17,6 +18,7 @@ interface GameState {
   sfxVolume: number
   musicEnabled: boolean
   sfxEnabled: boolean
+  musicLocation: MusicLocation
   
   // Visual settings
   parallaxIntensity: number
@@ -36,6 +38,7 @@ interface GameState {
   closePauseMenu: () => void
   startGame: () => void
   returnToMainMenu: () => void
+  setMusicLocation: (location: MusicLocation) => void
 }
 
 export const useGameStore = create<GameState>()(
@@ -49,6 +52,7 @@ export const useGameStore = create<GameState>()(
       sfxVolume: 80,
       musicEnabled: true,
       sfxEnabled: true,
+      musicLocation: 'menu',
       parallaxIntensity: 1,
       cursorEnabled: true,
 
@@ -91,13 +95,17 @@ export const useGameStore = create<GameState>()(
       
       startGame: () => set({ 
         currentScreen: 'portfolio',
-        previousScreen: 'main-menu'
+        previousScreen: 'main-menu',
+        musicLocation: 'portfolio'
       }),
       
       returnToMainMenu: () => set({
         currentScreen: 'main-menu',
-        previousScreen: null
-      })
+        previousScreen: null,
+        musicLocation: 'menu'
+      }),
+      
+      setMusicLocation: (musicLocation) => set({ musicLocation })
     }),
     {
       name: 'persona-portfolio-settings',

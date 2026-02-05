@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export type PersonaTheme = 'persona-3' | 'persona-4' | 'persona-5'
-export type GameScreen = 'main-menu' | 'portfolio' | 'settings' | 'pause-menu'
+export type GameScreen = 'start-screen' | 'main-menu' | 'portfolio' | 'settings' | 'pause-menu'
 export type MusicLocation = 'menu' | 'portfolio'
 
 interface GameState {
@@ -45,9 +45,9 @@ export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
       // Initial state
-      currentScreen: 'main-menu',
+      currentScreen: 'start-screen',
       previousScreen: null,
-      theme: 'persona-5',
+      theme: 'persona-3',
       musicVolume: 80,
       sfxVolume: 80,
       musicEnabled: true,

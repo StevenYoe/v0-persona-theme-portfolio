@@ -151,16 +151,16 @@ export function SettingsMenu() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-3xl px-8">
+      <div className="relative z-10 w-full max-w-sm sm:max-w-md md:max-w-xl lg:max-w-3xl px-4 sm:px-6 md:px-8">
         {/* Title */}
         <motion.div
           initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
-          className="mb-16"
+          className="mb-8 sm:mb-12 md:mb-16"
         >
           <h1 
-            className={`font-display text-6xl md:text-8xl tracking-wider ${
+            className={`font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-wider ${
               theme === 'persona-5' ? '-skew-x-6' : ''
             }`}
             style={{ color: accent }}
@@ -171,13 +171,13 @@ export function SettingsMenu() {
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.4, delay: 0.3 }}
-            className="h-1 w-32 mt-4"
+            className="h-1 w-24 sm:w-28 md:w-32 mt-2 sm:mt-3 md:mt-4"
             style={{ backgroundColor: accent, originX: 0 }}
           />
         </motion.div>
 
         {/* Settings list */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-5 md:space-y-6">
           {settingItems.map((item, index) => {
             const isSelected = selectedIndex === index
             
@@ -201,19 +201,19 @@ export function SettingsMenu() {
                 />
 
                 <div 
-                  className={`py-5 px-6 flex items-center justify-between ${
+                  className={`py-3 px-4 sm:py-4 sm:px-5 md:py-5 md:px-6 flex items-center justify-between flex-wrap gap-y-2 ${
                     theme === 'persona-5' ? 'skew-x-3' : ''
                   }`}
                 >
                   {/* Label */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     <motion.div
                       animate={{ scale: isSelected ? 1 : 0 }}
-                      className="w-3 h-3"
+                      className="w-2 h-2 sm:w-3 sm:h-3"
                       style={{ backgroundColor: accent }}
                     />
                     <span 
-                      className="font-display text-2xl md:text-3xl tracking-wider"
+                      className="font-display text-xl sm:text-2xl md:text-3xl tracking-wider"
                       style={{ color: isSelected ? accent : 'var(--foreground)' }}
                     >
                       {item.label}
@@ -221,19 +221,19 @@ export function SettingsMenu() {
                   </div>
 
                   {/* Control */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-end">
                     {item.id === 'theme' && (
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 sm:gap-4">
                         <button
                           onClick={() => handleAction('theme', 'left')}
-                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          className="font-display text-xl sm:text-2xl px-1 sm:px-2 opacity-60 hover:opacity-100 transition-opacity"
                           style={{ color: accent }}
                         >
                           {'<'}
                         </button>
-                        <div className="w-48 text-center">
+                        <div className="w-28 sm:w-36 md:w-48 text-center">
                           <span 
-                            className="font-display text-xl tracking-wider"
+                            className="font-display text-base sm:text-lg tracking-wider"
                             style={{ color: accent }}
                           >
                             {themeOptions[themeIndex].label}
@@ -244,7 +244,7 @@ export function SettingsMenu() {
                         </div>
                         <button
                           onClick={() => handleAction('theme', 'right')}
-                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          className="font-display text-xl sm:text-2xl px-1 sm:px-2 opacity-60 hover:opacity-100 transition-opacity"
                           style={{ color: accent }}
                         >
                           {'>'}
@@ -253,10 +253,10 @@ export function SettingsMenu() {
                     )}
 
                     {item.id === 'music' && (
-                      <div className="flex items-center gap-4 w-64">
+                      <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleAction('music', 'left')}
-                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          className="font-display text-xl sm:text-2xl px-1 sm:px-2 opacity-60 hover:opacity-100 transition-opacity"
                           style={{ color: accent }}
                         >
                           {'<'}
@@ -266,7 +266,7 @@ export function SettingsMenu() {
                           max={100}
                           step={10}
                           onValueChange={(value) => setMusicVolume(value[0])}
-                          className="flex-1"
+                          className="w-32 sm:w-48 md:w-64"
                           style={{ 
                             '--slider-track': `${accent}30`,
                             '--slider-range': accent,
@@ -275,13 +275,13 @@ export function SettingsMenu() {
                         />
                         <button
                           onClick={() => handleAction('music', 'right')}
-                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          className="font-display text-xl sm:text-2xl px-1 sm:px-2 opacity-60 hover:opacity-100 transition-opacity"
                           style={{ color: accent }}
                         >
                           {'>'}
                         </button>
                         <span 
-                          className="font-display text-lg w-12 text-right"
+                          className="font-display text-base sm:text-lg w-8 text-right"
                           style={{ color: accent }}
                         >
                           {musicVolume}%
@@ -290,10 +290,10 @@ export function SettingsMenu() {
                     )}
 
                     {item.id === 'sfx' && (
-                      <div className="flex items-center gap-4 w-64">
+                      <div className="flex items-center gap-3">
                         <button
                           onClick={() => handleAction('sfx', 'left')}
-                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          className="font-display text-xl sm:text-2xl px-1 sm:px-2 opacity-60 hover:opacity-100 transition-opacity"
                           style={{ color: accent }}
                         >
                           {'<'}
@@ -303,7 +303,7 @@ export function SettingsMenu() {
                           max={100}
                           step={10}
                           onValueChange={(value) => setSfxVolume(value[0])}
-                          className="flex-1"
+                          className="w-32 sm:w-48 md:w-64"
                           style={{ 
                             '--slider-track': `${accent}30`,
                             '--slider-range': accent,
@@ -312,13 +312,13 @@ export function SettingsMenu() {
                         />
                         <button
                           onClick={() => handleAction('sfx', 'right')}
-                          className="font-display text-2xl px-2 opacity-60 hover:opacity-100 transition-opacity"
+                          className="font-display text-xl sm:text-2xl px-1 sm:px-2 opacity-60 hover:opacity-100 transition-opacity"
                           style={{ color: accent }}
                         >
                           {'>'}
                         </button>
                         <span 
-                          className="font-display text-lg w-12 text-right"
+                          className="font-display text-base sm:text-lg w-8 text-right"
                           style={{ color: accent }}
                         >
                           {sfxVolume}%
@@ -339,7 +339,7 @@ export function SettingsMenu() {
                     {item.id === 'back' && (
                       <button
                         onClick={goBack}
-                        className="font-display text-xl tracking-wider px-6 py-2 border-2 hover:bg-accent/20 transition-colors"
+                        className="font-display text-base sm:text-xl tracking-wider px-4 sm:px-6 py-1 sm:py-2 border-2 hover:bg-accent/20 transition-colors"
                         style={{ borderColor: accent, color: accent }}
                       >
                         {'<'} RETURN
@@ -365,13 +365,13 @@ export function SettingsMenu() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="mt-16 text-center"
+          className="mt-8 sm:mt-12 text-center text-xs sm:text-sm"
         >
-          <p className="text-sm text-muted-foreground tracking-widest">
+          <p className="text-muted-foreground tracking-widest">
             <span style={{ color: accent }}>W/S</span> NAVIGATE
-            <span className="mx-4">|</span>
+            <span className="mx-2">|</span>
             <span style={{ color: accent }}>A/D</span> ADJUST
-            <span className="mx-4">|</span>
+            <span className="mx-2">|</span>
             <span style={{ color: accent }}>ESC</span> BACK
           </p>
         </motion.div>

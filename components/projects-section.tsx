@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useGameStore } from '@/lib/store'
 
 const projects = [
@@ -14,7 +15,7 @@ const projects = [
     tags: ['React', 'Node.js', 'WebSocket'],
     year: '2025',
     features: ['Real-time sync', 'Video chat', 'Task management', 'Analytics dashboard'],
-    image: '/project-velvet.jpg',
+    image: '/images/project-velvet.jpg',
     link: '#'
   },
   {
@@ -26,7 +27,7 @@ const projects = [
     tags: ['React Native', 'TensorFlow', 'Firebase'],
     year: '2024',
     features: ['AI analysis', 'Wearable sync', 'Smart alarms', 'Sleep reports'],
-    image: '/project-midnight.jpg',
+    image: '/images/project-midnight.jpg',
     link: '#'
   },
   {
@@ -38,7 +39,7 @@ const projects = [
     tags: ['Next.js', 'Three.js', 'Stripe'],
     year: '2024',
     features: ['3D viewer', 'AR try-on', 'One-click checkout', 'Inventory sync'],
-    image: '/project-shadow.jpg',
+    image: '/images/project-shadow.jpg',
     link: '#'
   },
   {
@@ -50,7 +51,7 @@ const projects = [
     tags: ['Canvas', 'GSAP', 'Howler.js'],
     year: '2023',
     features: ['50+ levels', 'Leaderboards', 'Achievements', 'Cloud saves'],
-    image: '/project-phantom.jpg',
+    image: '/images/project-phantom.jpg',
     link: '#'
   },
 ]
@@ -60,6 +61,7 @@ export function ProjectsSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [selectedProject, setSelectedProject] = useState<typeof projects[0] | null>(null)
+  const [isImageError, setIsImageError] = useState(false)
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -74,6 +76,8 @@ export function ProjectsSection() {
   useEffect(() => {
     if (selectedProject) {
       document.body.style.overflow = 'hidden'
+      // Reset image error state when a new project is selected
+      setIsImageError(false)
     } else {
       document.body.style.overflow = ''
     }
@@ -313,21 +317,34 @@ export function ProjectsSection() {
                         border: `2px solid ${accent}30`
                       }}
                     >
-                      {/* Project image placeholder with theme symbol */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <motion.div
-                          animate={{ 
-                            scale: [1, 1.1, 1],
-                            opacity: [0.2, 0.4, 0.2]
-                          }}
-                          transition={{ duration: 4, repeat: Infinity }}
-                          className="text-8xl font-display"
-                          style={{ color: accent }}
-                        >
-                          {theme === 'persona-3' ? '☽' : theme === 'persona-4' ? 'TV' : '♠'}
-                        </motion.div>
-                      </div>
-
+                      {selectedProject.image && !isImageError ? (
+                        <Image
+                          src={selectedProject.image}
+                          alt={selectedProject.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
+                          style={{ objectFit: 'cover' }}
+                          className={theme === 'persona-5' ? 'skew-x-3' : ''}
+                          onLoad={() => setIsImageError(false)}
+                          onError={() => setIsImageError(true)}
+                        />
+                      ) : (
+                        // Placeholder content when image is not available or fails to load
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <motion.div
+                            animate={{ 
+                              scale: [1, 1.1, 1],
+                              opacity: [0.2, 0.4, 0.2]
+                            }}
+                            transition={{ duration: 4, repeat: Infinity }}
+                            className="text-8xl font-display"
+                            style={{ color: accent }}
+                          >
+                            {theme === 'persona-3' ? '☽' : theme === 'persona-4' ? 'TV' : '♠'}
+                          </motion.div>
+                        </div>
+                      )}
+                      
                       {/* Scan lines */}
                       <div 
                         className="absolute inset-0 opacity-20"

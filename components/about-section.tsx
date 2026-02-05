@@ -1,13 +1,19 @@
 "use client"
 
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import Image from 'next/image'
 import { useGameStore } from '@/lib/store'
 import { ParallaxSection, FloatingElement } from './parallax-section'
 
 export function AboutSection() {
   const theme = useGameStore((state) => state.theme)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isImageError, setIsImageError] = useState(false)
+  
+  // Define the path for the profile image.
+  // An empty string will cause the placeholder to be shown.
+  const profileImagePath = '' // e.g., '/images/profile.jpg'
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -164,7 +170,7 @@ export function AboutSection() {
                 style={{ borderColor: accent }}
               />
               
-              {/* Image placeholder */}
+              {/* Image container */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -173,20 +179,32 @@ export function AboutSection() {
                 className={`relative aspect-[4/5] ${theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''} overflow-hidden`}
                 style={{ backgroundColor: 'var(--secondary)' }}
               >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.1, 1],
-                      opacity: [0.3, 0.6, 0.3],
-                      rotate: theme === 'persona-5' ? [0, 5, 0] : [0, 0, 0]
-                    }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                    className="text-9xl font-display"
-                    style={{ color: accent }}
-                  >
-                    {theme === 'persona-3' ? '☽' : theme === 'persona-4' ? 'TV' : '♠'}
-                  </motion.div>
-                </div>
+                {profileImagePath && !isImageError ? (
+                  <Image
+                    src={profileImagePath}
+                    alt="Profile Picture"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    style={{ objectFit: 'cover' }}
+                    className={theme === 'persona-5' ? 'skew-x-3' : ''}
+                    onError={() => setIsImageError(true)}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.1, 1],
+                        opacity: [0.3, 0.6, 0.3],
+                        rotate: theme === 'persona-5' ? [0, 5, 0] : [0, 0, 0]
+                      }}
+                      transition={{ duration: 4, repeat: Infinity }}
+                      className="text-9xl font-display"
+                      style={{ color: accent }}
+                    >
+                      {theme === 'persona-3' ? '☽' : theme === 'persona-4' ? 'TV' : '♠'}
+                    </motion.div>
+                  </div>
+                )}
                 
                 {/* Scan lines overlay */}
                 <div 

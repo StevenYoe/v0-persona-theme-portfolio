@@ -27,7 +27,7 @@ export function MainMenu() {
   
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [showQuitDialog, setShowQuitDialog] = useState(false)
-  const [hoverIndex, setHoverIndex] = useState<number | null>(null)
+  const [quitDialogIndex, setQuitDialogIndex] = useState(0)
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
@@ -41,11 +41,15 @@ export function MainMenu() {
         break
       case 'quit':
         setShowQuitDialog(true)
+        setQuitDialogIndex(0) // Default to NO
         break
     }
   }, [startGame, setScreen])
 
-  const handleQuit = () => {
+  const handleQuit = (confirmed: boolean) => {
+    setShowQuitDialog(false)
+    if (!confirmed) return
+
     // Try to close the tab/window
     window.close()
     // If that doesn't work (most browsers block this), show a message
@@ -57,7 +61,30 @@ export function MainMenu() {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (showQuitDialog) return
+      if (showQuitDialog) {
+        switch (e.key) {
+          case 'ArrowLeft':
+          case 'a':
+          case 'A':
+          case 'ArrowRight':
+          case 'd':
+          case 'D':
+            e.preventDefault()
+            setQuitDialogIndex((prev) => (prev === 0 ? 1 : 0))
+            break
+          case 'Enter':
+          case ' ':
+            e.preventDefault()
+            // 0 is NO, 1 is YES
+            handleQuit(quitDialogIndex === 1)
+            break
+          case 'Escape':
+            e.preventDefault()
+            setShowQuitDialog(false)
+            break
+        }
+        return
+      }
       
       switch (e.key) {
         case 'ArrowUp':
@@ -82,7 +109,7 @@ export function MainMenu() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedIndex, showQuitDialog, handleSelect])
+  }, [selectedIndex, showQuitDialog, quitDialogIndex, handleSelect])
 
   return (
     <motion.div
@@ -231,16 +258,16 @@ export function MainMenu() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-4xl px-8">
+      <div className="relative z-10 w-full max-w-sm sm:max-w-lg md:max-w-4xl lg:max-w-5xl xl:max-w-6xl px-4 sm:px-6 md:px-8">
         {/* Title */}
         <motion.div
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-20 text-center"
+          className="mb-12 sm:mb-16 md:mb-20 text-center"
         >
           <h1 
-            className={`font-display text-[15vw] md:text-[12vw] leading-none tracking-tight ${
+            className={`font-display text-[12vw] sm:text-[10vw] md:text-[8vw] lg:text-[7vw] leading-none tracking-tight ${
               theme === 'persona-5' ? '-skew-x-6' : ''
             } ${theme === 'persona-3' ? 'neon-glow' : ''}`}
             style={{ color: accent }}
@@ -251,15 +278,15 @@ export function MainMenu() {
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="h-1 w-48 mx-auto mt-4"
+            className="h-1 w-32 sm:w-40 md:w-48 mx-auto mt-2 sm:mt-3 md:mt-4"
             style={{ backgroundColor: accent }}
           />
         </motion.div>
 
         {/* Menu items */}
-        <nav className="space-y-4">
+        <nav className="space-y-3 sm:space-y-4">
           {menuItems.map((item, index) => {
-            const isSelected = selectedIndex === index || hoverIndex === index
+            const isSelected = selectedIndex === index;
             
             return (
               <motion.button
@@ -272,9 +299,9 @@ export function MainMenu() {
                   ease: [0.16, 1, 0.3, 1]
                 }}
                 onClick={() => handleSelect(item.id)}
-                onMouseEnter={() => setHoverIndex(index)}
-                onMouseLeave={() => setHoverIndex(null)}
+                onMouseEnter={() => setSelectedIndex(index)}
                 onFocus={() => setSelectedIndex(index)}
+                data-sfx-interactive
                 className={`w-full text-left relative group outline-none ${
                   theme === 'persona-5' ? '-skew-x-3' : ''
                 }`}
@@ -291,10 +318,10 @@ export function MainMenu() {
                   transition={{ duration: 0.2 }}
                 />
 
-                <div className={`py-6 px-8 flex items-center justify-between ${
+                <div className={`py-4 px-6 sm:py-5 sm:px-7 md:py-6 md:px-8 flex items-center justify-between ${
                   theme === 'persona-5' ? 'skew-x-3' : ''
                 }`}>
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-4 sm:gap-5 md:gap-6">
                     {/* Selection indicator */}
                     <motion.div
                       animate={{
@@ -305,7 +332,7 @@ export function MainMenu() {
                     >
                       {theme === 'persona-5' && (
                         <div 
-                          className="w-4 h-4 -rotate-45"
+                          className="w-3 h-3 sm:w-4 sm:h-4 -rotate-45"
                           style={{ 
                             backgroundColor: isSelected ? 'var(--background)' : accent 
                           }}
@@ -313,7 +340,7 @@ export function MainMenu() {
                       )}
                       {theme === 'persona-4' && (
                         <div 
-                          className="w-4 h-4 border-2"
+                          className="w-3 h-3 sm:w-4 sm:h-4 border-2"
                           style={{ 
                             borderColor: isSelected ? 'var(--background)' : accent,
                             backgroundColor: isSelected ? 'var(--background)' : 'transparent'
@@ -322,7 +349,7 @@ export function MainMenu() {
                       )}
                       {theme === 'persona-3' && (
                         <div 
-                          className="w-4 h-4 rounded-full"
+                          className="w-3 h-3 sm:w-4 sm:h-4 rounded-full"
                           style={{ 
                             backgroundColor: isSelected ? 'var(--background)' : accent,
                             boxShadow: `0 0 10px ${isSelected ? 'var(--background)' : accent}`
@@ -334,7 +361,7 @@ export function MainMenu() {
                     {/* Text */}
                     <div>
                       <span 
-                        className="font-display text-4xl md:text-5xl tracking-wider block"
+                        className="font-display text-3xl sm:text-4xl md:text-5xl tracking-wider block"
                         style={{ 
                           color: isSelected ? 'var(--background)' : 'var(--foreground)' 
                         }}
@@ -342,7 +369,7 @@ export function MainMenu() {
                         {item.label}
                       </span>
                       <span 
-                        className="text-sm tracking-widest opacity-60"
+                        className="text-xs sm:text-sm tracking-widest opacity-60"
                         style={{ 
                           color: isSelected ? 'var(--background)' : 'var(--muted-foreground)' 
                         }}
@@ -356,7 +383,7 @@ export function MainMenu() {
                   <motion.div
                     animate={{ x: isSelected ? 0 : -20, opacity: isSelected ? 1 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="font-display text-4xl"
+                    className="font-display text-3xl sm:text-4xl"
                     style={{ color: isSelected ? 'var(--background)' : accent }}
                   >
                     {'>'}
@@ -378,11 +405,11 @@ export function MainMenu() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
-          className="mt-16 text-center"
+          className="mt-12 sm:mt-16 text-center text-xs sm:text-sm"
         >
-          <p className="text-sm text-muted-foreground tracking-widest">
+          <p className="text-muted-foreground tracking-widest">
             USE <span style={{ color: accent }}>ARROWS</span> OR <span style={{ color: accent }}>W/S</span> TO NAVIGATE
-            <span className="mx-4">|</span>
+            <span className="mx-2 sm:mx-4">|</span>
             PRESS <span style={{ color: accent }}>ENTER</span> TO SELECT
           </p>
         </motion.div>
@@ -399,29 +426,39 @@ export function MainMenu() {
         >
           <AlertDialogHeader>
             <AlertDialogTitle 
-              className="font-display text-3xl tracking-wider"
+              className="font-display text-2xl sm:text-3xl tracking-wider"
               style={{ color: accent }}
             >
               QUIT APPLICATION?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
+            <AlertDialogDescription className="text-muted-foreground text-sm sm:text-base">
               Are you sure you want to exit? Your progress will not be saved.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-4">
-            <AlertDialogCancel 
-              className="font-display text-xl tracking-wider border-2 px-8"
-              style={{ borderColor: accent, color: accent }}
-            >
-              NO
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleQuit}
-              className="font-display text-xl tracking-wider px-8"
-              style={{ backgroundColor: accent, color: 'var(--background)' }}
-            >
-              YES
-            </AlertDialogAction>
+          <AlertDialogFooter className="gap-2 sm:gap-4">
+            {['NO', 'YES'].map((option, i) => {
+              const isSelected = quitDialogIndex === i
+              return (
+                <motion.button
+                  key={option}
+                  data-sfx-interactive
+                  onClick={() => handleQuit(option === 'YES')}
+                  onMouseEnter={() => setQuitDialogIndex(i)}
+                  className={`w-full font-display text-base sm:text-xl tracking-wider border-2 px-6 sm:px-8 transition-colors ${
+                    option === 'NO' ? '' : ''
+                  }`}
+                  style={{
+                    borderColor: accent,
+                    backgroundColor: isSelected ? accent : 'transparent',
+                    color: isSelected ? 'var(--background)' : accent,
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {option}
+                </motion.button>
+              )
+            })}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

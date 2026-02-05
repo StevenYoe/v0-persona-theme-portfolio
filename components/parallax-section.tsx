@@ -66,7 +66,7 @@ export function ParallaxSection({
   return (
     <motion.div
       ref={ref}
-      style={{ y, x, opacity, scale, rotateZ: rotation }}
+      style={{ y, x, opacity, scale, rotateZ: rotation, willChange: 'transform, opacity' }}
       className={`relative ${className}`}
     >
       {children}
@@ -107,7 +107,7 @@ export function ParallaxLayer({
 
   return (
     <motion.div
-      style={{ y, scale }}
+      style={{ y, scale, willChange: 'transform' }}
       className={`absolute inset-0 ${className}`}
     >
       {children}

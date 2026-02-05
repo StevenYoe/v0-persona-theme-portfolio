@@ -341,7 +341,7 @@ export function ExperienceSection() {
                     style={{ direction: 'ltr' }}
                   >
                     <motion.div
-                      className={`p-6 border transition-all duration-300 ${
+                      className={`p-6 border transition-all duration-300 relative ${
                         theme === 'persona-5' ? '-skew-x-2' : theme === 'persona-3' ? 'rounded-lg' : ''
                       }`}
                       style={{ 

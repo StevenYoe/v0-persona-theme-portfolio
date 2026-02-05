@@ -9,367 +9,345 @@ const getAudioPath = (theme: 'persona-3' | 'persona-4' | 'persona-5', filename: 
   return `/audio/${themeFolder}/${filename}`
 }
 
-// Audio Player class using HTML5 Audio API
 class AudioPlayer {
-  private currentBGM: HTMLAudioElement | null = null
-  private nextBGM: HTMLAudioElement | null = null
-  private audioCache: Map<string, HTMLAudioElement> = new Map()
-  private fadeInterval: NodeJS.Timeout | null = null
+  private bgm: HTMLAudioElement | null = null
+  private sfxCache: Map<string, HTMLAudioElement> = new Map()
   private volume = 0.8
   private theme: 'persona-3' | 'persona-4' | 'persona-5' = 'persona-5'
   private location: 'menu' | 'portfolio' = 'menu'
   private isPlaying = false
+  private fadeInterval: NodeJS.Timeout | null = null
 
-  // Initialize and preload audio
-  init(theme: 'persona-3' | 'persona-4' | 'persona-5', location: 'menu' | 'portfolio') {
+  init(theme: 'persona-3' | 'persona-4' | 'persona-5', location: 'menu' | 'portfolio', volume: number) {
     this.theme = theme
     this.location = location
-    this.preloadAudio(theme, location)
+    this.volume = volume / 100
+    this.preloadSfx(theme)
   }
 
-  // Preload audio files for a specific theme and location
-  private preloadAudio(theme: 'persona-3' | 'persona-4' | 'persona-5', location: 'menu' | 'portfolio') {
-    const filename = location === 'menu' ? 'menu-bgm.mp3' : 'portfolio-bgm.mp3'
-    const path = getAudioPath(theme, filename)
-
-    if (!this.audioCache.has(path)) {
-      const audio = new Audio(path)
-      audio.loop = true
-      audio.preload = 'auto'
-      audio.volume = 0
-      this.audioCache.set(path, audio)
-    }
-  }
-
-  // Preload all audio files for better performance
-  preloadAll() {
-    const themes: ('persona-3' | 'persona-4' | 'persona-5')[] = ['persona-3', 'persona-4', 'persona-5']
-    const locations: ('menu' | 'portfolio')[] = ['menu', 'portfolio']
-
-    themes.forEach(theme => {
-      locations.forEach(location => {
-        this.preloadAudio(theme, location)
-      })
-    })
-  }
-
-  // Set volume (0-100)
-  setVolume(vol: number) {
-    this.volume = vol / 100
-    if (this.currentBGM) {
-      this.currentBGM.volume = this.volume
-    }
-  }
-
-  // Set theme and switch audio if needed
-  setTheme(theme: 'persona-3' | 'persona-4' | 'persona-5') {
-    if (this.theme === theme) return
-    this.theme = theme
-    if (this.isPlaying) {
-      this.switchTrack()
-    }
-  }
-
-  // Set location and switch audio if needed
-  setLocation(location: 'menu' | 'portfolio') {
-    if (this.location === location) return
-    this.location = location
-    if (this.isPlaying) {
-      this.switchTrack()
-    }
-  }
-
-  // Play current track
-  play() {
-    if (this.isPlaying) return
-
-    const filename = this.location === 'menu' ? 'menu-bgm.mp3' : 'portfolio-bgm.mp3'
-    const path = getAudioPath(this.theme, filename)
-
-    // Get or create audio element
-    let audio = this.audioCache.get(path)
-    if (!audio) {
-      audio = new Audio(path)
-      audio.loop = true
-      audio.preload = 'auto'
-      this.audioCache.set(path, audio)
-    }
-
-    this.currentBGM = audio
-    this.currentBGM.volume = 0
-
-    // Start playing and fade in
-    const playPromise = this.currentBGM.play()
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        this.fadeIn(this.currentBGM!)
-      }).catch(error => {
-        console.warn('Audio playback failed:', error)
-      })
-    }
-
-    this.isPlaying = true
-  }
-
-  // Stop current track
-  stop() {
-    if (!this.currentBGM) return
-
-    this.fadeOut(this.currentBGM, () => {
-      if (this.currentBGM) {
-        this.currentBGM.pause()
-        this.currentBGM.currentTime = 0
+  private preloadSfx(theme: 'persona-3' | 'persona-4' | 'persona-5') {
+    ['hover.mp3', 'select.mp3'].forEach(sfx => {
+      const path = getAudioPath(theme, sfx)
+      if (!this.sfxCache.has(path)) {
+        const audio = new Audio(path)
+        audio.preload = 'auto'
+        this.sfxCache.set(path, audio)
       }
-      this.isPlaying = false
     })
   }
 
-  // Switch to a different track with crossfade
-  private switchTrack() {
+  private getBgmPath(): string {
     const filename = this.location === 'menu' ? 'menu-bgm.mp3' : 'portfolio-bgm.mp3'
-    const path = getAudioPath(this.theme, filename)
-
-    // Get or create new audio element
-    let newAudio = this.audioCache.get(path)
-    if (!newAudio) {
-      newAudio = new Audio(path)
-      newAudio.loop = true
-      newAudio.preload = 'auto'
-      this.audioCache.set(path, newAudio)
-    }
-
-    // If same track, do nothing
-    if (this.currentBGM && this.currentBGM === newAudio) return
-
-    this.nextBGM = newAudio
-    this.nextBGM.volume = 0
-
-    // Start new track
-    const playPromise = this.nextBGM.play()
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        // Crossfade
-        this.crossfade()
-      }).catch(error => {
-        console.warn('Audio playback failed:', error)
-      })
-    }
+    return getAudioPath(this.theme, filename)
   }
 
-  // Fade in audio
-  private fadeIn(audio: HTMLAudioElement, duration = 500) {
+  private fadeIn(duration = 500) {
+    if (!this.bgm) return
     if (this.fadeInterval) clearInterval(this.fadeInterval)
 
+    this.bgm.volume = 0
+    const targetVolume = this.volume
     const steps = 20
     const stepDuration = duration / steps
-    const volumeStep = this.volume / steps
+    const volumeStep = targetVolume / steps
     let currentStep = 0
 
     this.fadeInterval = setInterval(() => {
       currentStep++
-      audio.volume = Math.min(volumeStep * currentStep, this.volume)
+      const newVolume = Math.min(volumeStep * currentStep, targetVolume)
+      if (this.bgm) {
+        this.bgm.volume = newVolume
+      }
 
       if (currentStep >= steps) {
         if (this.fadeInterval) clearInterval(this.fadeInterval)
-        this.fadeInterval = null
       }
     }, stepDuration)
   }
 
-  // Fade out audio
-  private fadeOut(audio: HTMLAudioElement, onComplete?: () => void, duration = 500) {
+  private fadeOut(onComplete?: () => void, duration = 500) {
+    if (!this.bgm) {
+      if (onComplete) onComplete()
+      return
+    }
     if (this.fadeInterval) clearInterval(this.fadeInterval)
-
+    
+    const currentAudio = this.bgm
+    const initialVolume = currentAudio.volume
     const steps = 20
     const stepDuration = duration / steps
-    const volumeStep = audio.volume / steps
+    const volumeStep = initialVolume / steps
     let currentStep = 0
 
     this.fadeInterval = setInterval(() => {
       currentStep++
-      audio.volume = Math.max(audio.volume - volumeStep, 0)
-
+      const newVolume = Math.max(initialVolume - (volumeStep * currentStep), 0)
+      currentAudio.volume = newVolume
+      
       if (currentStep >= steps) {
         if (this.fadeInterval) clearInterval(this.fadeInterval)
-        this.fadeInterval = null
         if (onComplete) onComplete()
       }
     }, stepDuration)
   }
 
-  // Crossfade between current and next track
-  private crossfade(duration = 500) {
-    if (!this.currentBGM || !this.nextBGM) return
+  play() {
+    if (this.isPlaying) return
+    this.isPlaying = true
 
-    const oldAudio = this.currentBGM
-    const newAudio = this.nextBGM
-
-    // Fade out old, fade in new
-    this.fadeOut(oldAudio, () => {
-      oldAudio.pause()
-      oldAudio.currentTime = 0
-    }, duration)
-
-    this.fadeIn(newAudio, duration)
-
-    // Switch references
-    this.currentBGM = newAudio
-    this.nextBGM = null
+    this.fadeOut(() => {
+      if (this.bgm) {
+        this.bgm.pause()
+        this.bgm.src = '' // Release resource
+      }
+      
+      this.bgm = new Audio(this.getBgmPath())
+      this.bgm.loop = true
+      this.bgm.volume = 0
+      
+      const playPromise = this.bgm.play()
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          this.fadeIn()
+        }).catch(error => {
+          console.warn('Audio playback failed to start:', error)
+          this.isPlaying = false
+        })
+      }
+    })
+  }
+  
+  stop() {
+    if (!this.isPlaying) return
+    this.isPlaying = false
+    
+    this.fadeOut(() => {
+      if (this.bgm) {
+        this.bgm.pause()
+        this.bgm.currentTime = 0
+        this.bgm.src = '' // Release resource
+        this.bgm = null
+      }
+    })
   }
 
-  // Play sound effect
-  playSFX(sfxType: 'hover' | 'select', volume: number) {
-    const filename = sfxType === 'hover' ? 'hover.mp3' : 'select.mp3'
-    const path = getAudioPath(this.theme, filename)
+  private changeTrack() {
+    if (!this.isPlaying) return
+    
+    this.fadeOut(() => {
+      if (this.bgm) {
+        this.bgm.pause()
+      }
+      
+      this.bgm = new Audio(this.getBgmPath())
+      this.bgm.loop = true
+      
+      const playPromise = this.bgm.play()
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          this.fadeIn()
+        }).catch(error => {
+          console.warn('Audio playback failed on track change:', error)
+        })
+      }
+    })
+  }
 
-    // Create new audio instance for SFX (allows multiple simultaneous plays)
-    const sfx = new Audio(path)
+  setVolume(vol: number) {
+    this.volume = vol / 100
+    if (this.bgm && this.isPlaying) {
+      // Don't interrupt fades
+      if (!this.fadeInterval) {
+        this.bgm.volume = this.volume
+      }
+    }
+  }
+
+  setTheme(theme: 'persona-3' | 'persona-4' | 'persona-5') {
+    if (this.theme === theme) return
+    this.theme = theme
+    this.preloadSfx(theme)
+    this.changeTrack()
+  }
+
+  setLocation(location: 'menu' | 'portfolio') {
+    if (this.location === location) return
+    this.location = location
+    this.changeTrack()
+  }
+
+  playSFX(sfxType: 'hover' | 'select', volume: number) {
+    const path = getAudioPath(this.theme, `${sfxType}.mp3`)
+    const sfx = new Audio(path) // Create new instance to allow overlaps
     sfx.volume = volume / 100
     const playPromise = sfx.play()
 
     if (playPromise !== undefined) {
       playPromise.catch(error => {
-        // Silently fail for SFX if file doesn't exist yet
         console.debug('SFX playback failed:', error)
       })
     }
   }
-
-  // Cleanup
+  
   destroy() {
     this.stop()
-    this.audioCache.forEach(audio => {
-      audio.pause()
-      audio.src = ''
-    })
-    this.audioCache.clear()
+    if (this.fadeInterval) {
+      clearInterval(this.fadeInterval)
+    }
+    this.sfxCache.clear()
   }
 }
 
-// Global audio player instance
+// Keep a single instance
 let audioPlayer: AudioPlayer | null = null
 
 export function AudioManager() {
-  const theme = useGameStore((state) => state.theme)
-  const musicVolume = useGameStore((state) => state.musicVolume)
-  const sfxVolume = useGameStore((state) => state.sfxVolume)
-  const musicEnabled = useGameStore((state) => state.musicEnabled)
-  const sfxEnabled = useGameStore((state) => state.sfxEnabled)
-  const musicLocation = useGameStore((state) => state.musicLocation)
-
+  const store = useGameStore()
   const isInitialized = useRef(false)
+  const lastHoveredElement = useRef<EventTarget | null>(null)
 
-  // Initialize audio on first user interaction
+  // Initialization: needs to happen after a user interaction
   const initAudio = useCallback(() => {
-    if (isInitialized.current) return
-
+    if (isInitialized.current || typeof window === 'undefined') return
+    
     if (!audioPlayer) {
       audioPlayer = new AudioPlayer()
     }
-    audioPlayer.init(theme, musicLocation)
-    audioPlayer.preloadAll() // Preload all audio files
+    
+    audioPlayer.init(store.theme, store.musicLocation, store.musicVolume)
     isInitialized.current = true
 
-    if (musicEnabled) {
-      audioPlayer.setVolume(musicVolume)
+    if (store.musicEnabled) {
       audioPlayer.play()
     }
-  }, [musicEnabled, musicVolume, theme, musicLocation])
+    
+    // Remove listeners once done
+    window.removeEventListener('click', initAudio)
+    window.removeEventListener('keydown', initAudio)
+  }, [store.theme, store.musicLocation, store.musicVolume, store.musicEnabled])
+  
+  // Setup first interaction listener
+  useEffect(() => {
+    window.addEventListener('click', initAudio)
+    window.addEventListener('keydown', initAudio)
+    
+    return () => {
+      window.removeEventListener('click', initAudio)
+      window.removeEventListener('keydown', initAudio)
+    }
+  }, [initAudio])
 
-  // Update theme
+  // Effect for theme changes
   useEffect(() => {
     if (audioPlayer && isInitialized.current) {
-      audioPlayer.setTheme(theme)
+      audioPlayer.setTheme(store.theme)
     }
-  }, [theme])
+  }, [store.theme])
 
-  // Update music location
+  // Effect for location changes
   useEffect(() => {
     if (audioPlayer && isInitialized.current) {
-      audioPlayer.setLocation(musicLocation)
+      audioPlayer.setLocation(store.musicLocation)
     }
-  }, [musicLocation])
+  }, [store.musicLocation])
 
-  // Update music volume
+  // Effect for volume changes
   useEffect(() => {
     if (audioPlayer && isInitialized.current) {
-      audioPlayer.setVolume(musicVolume)
+      audioPlayer.setVolume(store.musicVolume)
     }
-  }, [musicVolume])
+  }, [store.musicVolume])
 
-  // Toggle music
+  // Effect for toggling music on/off
   useEffect(() => {
     if (!audioPlayer || !isInitialized.current) return
-
-    if (musicEnabled) {
+    
+    if (store.musicEnabled) {
       audioPlayer.play()
     } else {
       audioPlayer.stop()
     }
-  }, [musicEnabled])
-
-  // Play hover sound effect
-  const playHoverSfx = useCallback(() => {
-    if (!sfxEnabled || !isInitialized.current || !audioPlayer) return
-    audioPlayer.playSFX('hover', sfxVolume)
-  }, [sfxEnabled, sfxVolume])
-
-  // Play select sound effect
-  const playSelectSfx = useCallback(() => {
-    if (!sfxEnabled || !isInitialized.current || !audioPlayer) return
-    audioPlayer.playSFX('select', sfxVolume)
-  }, [sfxEnabled, sfxVolume])
-
-  // Initialize on first user interaction
-  useEffect(() => {
-    const handleFirstInteraction = () => {
+  }, [store.musicEnabled])
+  
+  // Effect for SFX
+  const playSfx = useCallback((type: 'hover' | 'select') => {
+    if (!isInitialized.current) {
       initAudio()
-      window.removeEventListener('click', handleFirstInteraction)
-      window.removeEventListener('keydown', handleFirstInteraction)
     }
+    if (!audioPlayer || !isInitialized.current || !store.sfxEnabled) return
+    audioPlayer.playSFX(type, store.sfxVolume)
+  }, [store.sfxEnabled, store.sfxVolume, initAudio])
 
-    window.addEventListener('click', handleFirstInteraction)
-    window.addEventListener('keydown', handleFirstInteraction)
-
-    return () => {
-      window.removeEventListener('click', handleFirstInteraction)
-      window.removeEventListener('keydown', handleFirstInteraction)
-    }
-  }, [initAudio])
-
-  // Add event listeners for interactive elements
   useEffect(() => {
-    const handleMouseEnter = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.tagName === 'BUTTON' || target.closest('button') || target.tagName === 'A') {
-        playHoverSfx()
+    const handleSFXPlay = (type: 'hover' | 'select', targetElement: HTMLElement) => {
+      const interactiveElement = targetElement.closest('button, a, input[type="range"], input[type="checkbox"], [role="button"], [role="menuitem"], [tabindex]:not([tabindex="-1"]), [data-sfx-interactive]') as HTMLElement | null;
+      if (interactiveElement) {
+        if (type === 'hover') {
+          if (lastHoveredElement.current !== interactiveElement) {
+            playSfx('hover')
+            lastHoveredElement.current = interactiveElement
+          }
+        } else { // type === 'select'
+          playSfx('select')
+        }
+      } else {
+        lastHoveredElement.current = null;
       }
+    }
+
+    const handleMouseEnter = (e: MouseEvent) => {
+      handleSFXPlay('hover', e.target as HTMLElement)
+    }
+
+    const handleMouseLeave = (e: MouseEvent) => {
+      // Clear last hovered element only if the mouse is truly leaving the interactive element
+      // This helps prevent re-triggering hover sfx when moving between nested elements
+      if (lastHoveredElement.current === (e.relatedTarget as HTMLElement)?.closest('button, a, input[type="range"], input[type="checkbox"], [role="button"], [role="menuitem"], [tabindex]:not([tabindex="-1"])')) {
+        // Still hovering over the same logical interactive element
+        return;
+      }
+      lastHoveredElement.current = null
     }
 
     const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.tagName === 'BUTTON' || target.closest('button') || target.tagName === 'A') {
-        playSelectSfx()
-      }
+      handleSFXPlay('select', e.target as HTMLElement)
     }
 
-    document.addEventListener('mouseenter', handleMouseEnter, true)
-    document.addEventListener('click', handleClick, true)
-
-    return () => {
-      document.removeEventListener('mouseenter', handleMouseEnter, true)
-      document.removeEventListener('click', handleClick, true)
+    const handleFocusIn = (e: FocusEvent) => {
+      handleSFXPlay('hover', e.target as HTMLElement)
     }
-  }, [playHoverSfx, playSelectSfx])
 
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (audioPlayer) {
-        audioPlayer.destroy()
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Enter' || e.key === ' ') && document.activeElement) {
+        handleSFXPlay('select', document.activeElement as HTMLElement)
       }
+    }
+    
+    // Add global event listeners
+    document.addEventListener('mouseover', handleMouseEnter)
+    document.addEventListener('mouseout', handleMouseLeave)
+    document.addEventListener('click', handleClick)
+    document.addEventListener('focusin', handleFocusIn)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      // Clean up event listeners
+      document.removeEventListener('mouseover', handleMouseEnter)
+      document.removeEventListener('mouseout', handleMouseLeave)
+      document.removeEventListener('click', handleClick)
+      document.removeEventListener('focusin', handleFocusIn)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [playSfx])
+
+  // Cleanup on unmount
+  useEffect(() => () => {
+    if (audioPlayer) {
+      audioPlayer.destroy()
+      audioPlayer = null
+      isInitialized.current = false
     }
   }, [])
 
-  return null // This is a non-visual component
+  return null
 }

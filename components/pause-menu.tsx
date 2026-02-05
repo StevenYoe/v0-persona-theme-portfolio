@@ -98,7 +98,8 @@ export function PauseMenu() {
           case 'Enter':
           case ' ':
             e.preventDefault()
-            handleConfirmMainMenu(confirmSelectedIndex === 0)
+            // 0 is NO, 1 is YES
+            handleConfirmMainMenu(confirmSelectedIndex === 1)
             break
         }
         return
@@ -245,6 +246,7 @@ export function PauseMenu() {
               ].map((tab) => (
                 <motion.button
                   key={tab.id}
+                  data-sfx-interactive
                   onClick={() => setActiveTab(tab.id as 'menu' | 'navigation')}
                   className={`px-6 py-3 font-display text-lg tracking-wider transition-all ${
                     theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''
@@ -279,6 +281,7 @@ export function PauseMenu() {
                   return (
                     <motion.button
                       key={item.id}
+                      data-sfx-interactive
                       initial={{ x: -50, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.2 + index * 0.05 }}
@@ -414,11 +417,12 @@ export function PauseMenu() {
                     </p>
 
                     <div className="flex justify-center gap-4">
-                      {['YES', 'NO'].map((option, i) => {
+                      {['NO', 'YES'].map((option, i) => {
                         const isSelected = confirmSelectedIndex === i
                         return (
                           <motion.button
                             key={option}
+                            data-sfx-interactive
                             onClick={() => handleConfirmMainMenu(option === 'YES')}
                             onMouseEnter={() => setConfirmSelectedIndex(i)}
                             className={`px-8 py-4 font-display text-xl tracking-wider transition-all ${

@@ -189,34 +189,33 @@ body::-webkit-scrollbar {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  animation: tv-static 0.5s infinite;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  animation: tv-static 0.8s infinite;
   pointer-events: none;
+  will-change: opacity;
 }
 
 /* Moon glow for P3 */
 @keyframes moon-pulse {
-  0%, 100% { box-shadow: 0 0 30px var(--primary), 0 0 60px var(--primary); }
-  50% { box-shadow: 0 0 50px var(--primary), 0 0 100px var(--primary); }
+  0%, 100% { box-shadow: 0 0 25px var(--primary), 0 0 50px var(--primary); }
+  50% { box-shadow: 0 0 40px var(--primary), 0 0 80px var(--primary); }
 }
 
 .persona-3 .moon-glow {
   animation: moon-pulse 4s ease-in-out infinite;
+  will-change: box-shadow;
 }
 
 /* Smooth scrolling improvements */
 html.lenis, html.lenis body {
   height: auto;
 }
-
 .lenis.lenis-smooth {
   scroll-behavior: auto !important;
 }
-
 .lenis.lenis-smooth [data-lenis-prevent] {
   overscroll-behavior: contain;
 }
-
 .lenis.lenis-stopped {
   overflow: hidden;
 }
@@ -226,18 +225,40 @@ html.lenis, html.lenis body {
   background: #e6001240;
   color: #ffffff;
 }
-
 .persona-4 ::selection {
   background: #ffd70040;
   color: #ffd700;
 }
-
 .persona-3 ::selection {
   background: #00d4ff40;
   color: #00d4ff;
 }
 
-/* Smooth transitions for theme changes */
-* {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+/* Scoped transitions for theme changes for better performance */
+body, .card, .btn, .bg-background, .bg-card, .text-foreground, .border-border {
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+}
+
+/* Pre-loader styles */
+.pre-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--background);
+  transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+  opacity: 1;
+  visibility: visible;
+}
+
+.pre-loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.pre-loader-content {
+  text-align: center;
+  color: var(--foreground);
 }

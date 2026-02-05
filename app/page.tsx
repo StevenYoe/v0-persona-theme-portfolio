@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/lib/store'
 import { LenisProvider } from '@/components/lenis-provider'
+import { StartScreen } from '@/components/start-screen'
 import { MainMenu } from '@/components/main-menu'
 import { SettingsMenu } from '@/components/settings-menu'
 import { PauseMenu } from '@/components/pause-menu'
@@ -17,11 +18,11 @@ import { ContactSection } from '@/components/contact-section'
 import { CustomCursor } from '@/components/custom-cursor'
 import { TransitionWrapper } from '@/components/transition-wrapper'
 import { AudioManager } from '@/components/audio-manager'
+import PreLoader from '@/components/pre-loader';
 
 export default function Home() {
-  const currentScreen = useGameStore((state) => state.currentScreen)
-  const openPauseMenu = useGameStore((state) => state.openPauseMenu)
-  const theme = useGameStore((state) => state.theme)
+  const [isLoading, setIsLoading] = useState(true)
+  const { currentScreen, openPauseMenu, theme, setScreen } = useGameStore()
 
   // Apply theme on mount and changes
   useEffect(() => {
@@ -41,12 +42,21 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [currentScreen, openPauseMenu])
 
+  if (isLoading) {
+    return <PreLoader onComplete={() => setIsLoading(false)} />
+  }
+
   return (
     <LenisProvider>
       <CustomCursor />
       <AudioManager />
       
       <AnimatePresence mode="wait">
+        {/* Start Screen */}
+        {currentScreen === 'start-screen' && (
+          <StartScreen key="start-screen" />
+        )}
+
         {/* Main Menu */}
         {currentScreen === 'main-menu' && (
           <MainMenu key="main-menu" />

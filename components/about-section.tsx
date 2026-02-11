@@ -16,7 +16,7 @@ export function AboutSection() {
   
   // Define the path for the profile image.
   // An empty string will cause the placeholder to be shown.
-  const profileImagePath = '/images/profile-picture.jpg'
+  const profileImagePath = '/images/profile-picture.webp'
   
   const { scrollYProgress } = useScroll({
     target: containerRef,

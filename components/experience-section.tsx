@@ -10,87 +10,159 @@ type ExperienceTab = 'work' | 'organization' | 'education'
 const workExperience = [
   {
     id: 1,
-    role: 'Senior Frontend Developer',
-    company: 'Tech Innovations Inc.',
-    period: '2023 - Present',
-    description: 'Leading frontend architecture and mentoring junior developers. Building scalable React applications with Next.js.',
-    highlights: ['Led team of 5 developers', 'Improved performance by 40%', 'Implemented design system']
+    role: 'Product Operation Intern – Quality Assurance',
+    company: 'PT Global Loyalty Indonesia',
+    period: 'August 2025 – January 2026',
+    description: 'Focused on ensuring seamless user experiences and validating functional requirements within high-traffic mobile applications as a Product Operation Intern – Quality Assurance.',
+    highlights: [
+      'Executed Manual Testing for Alfagift mobile app',
+      'Developed comprehensive Test Scenarios & Cases',
+      'Reported defects using Jira for timely resolution',
+      'Authored User Guides for new features',
+      'Utilized Postman, DBeaver, MongoDB, Redis for data validation'
+    ]
   },
   {
     id: 2,
-    role: 'Full Stack Developer',
-    company: 'Digital Solutions Co.',
-    period: '2021 - 2023',
-    description: 'Developed full-stack applications using React, Node.js, and PostgreSQL. Collaborated with design team on UX improvements.',
-    highlights: ['Built 10+ client projects', 'Integrated payment systems', 'API development']
+    role: 'IT Internship',
+    company: 'PT Pristine Prima Lestari',
+    period: 'March - July 2025',
+    description: 'Managed full-stack web development, covering the entire SDLC, and provided essential technical support for company operations as an IT Intern.',
+    highlights: [
+      'Developed a full-stack company website & job portal',
+      'Managed SDLC from frontend to backend & database',
+      'Provided technical infrastructure support'
+    ]
   },
   {
     id: 3,
-    role: 'Junior Developer',
-    company: 'StartUp Hub',
-    period: '2019 - 2021',
-    description: 'Started journey as a developer, learning modern web technologies and contributing to various startup projects.',
-    highlights: ['React fundamentals', 'Agile methodology', 'Version control']
+    role: 'Web Development Internship',
+    company: 'PT Samanasoft Inovasi Persada',
+    period: 'June - July 2024',
+    description: 'Contributed to web development projects by developing features for existing websites and programs, and creating tutorial videos.',
+    highlights: [
+      'Developed features for existing websites/programs',
+      'Contributed to tutorial video creation'
+    ]
   },
 ]
 
 const organizationExperience = [
   {
     id: 1,
-    role: 'Tech Lead',
-    company: 'Developer Community Local',
-    period: '2022 - Present',
-    description: 'Organizing tech meetups and workshops for local developer community. Managing volunteer teams and speaker coordination.',
-    highlights: ['500+ community members', 'Monthly events', 'Workshop facilitation']
+    role: 'Treasurer & Head of Multimedia Division',
+    company: 'Inaugurasi 2024 (Senate Session Welcoming New Students)',
+    period: '2024',
+    description: 'Managed financial resources and multimedia aspects for the new student orientation event \'Inaugurasi 2024\'.',
+    highlights: [
+      'Managed budget allocation',
+      'Led multimedia content creation'
+    ]
   },
   {
     id: 2,
-    role: 'Open Source Contributor',
-    company: 'Various Projects',
-    period: '2020 - Present',
-    description: 'Active contributor to open source projects. Maintaining personal libraries and contributing to popular frameworks.',
-    highlights: ['100+ contributions', 'Library maintainer', 'Documentation']
+    role: 'Treasurer',
+    company: 'ECLIVAL 2024 (E-Commerce Logistics Student Association Festival)',
+    period: '2024',
+    description: 'Handled financial management for ECLIVAL 2024, a large-scale festival organized by the E-Commerce Logistics Student Association.',
+    highlights: [
+      'Oversaw financial transactions & reporting',
+      'Ensured fiscal responsibility'
+    ]
   },
   {
     id: 3,
-    role: 'Hackathon Organizer',
-    company: 'Code For Good',
-    period: '2021 - 2022',
-    description: 'Organized hackathons focused on social impact. Coordinated with sponsors and managed participant experience.',
-    highlights: ['3 major events', '200+ participants', 'Sponsorship management']
+    role: 'Treasurer',
+    company: 'E-Commerce Logistics Student Association',
+    period: 'January 2023 - June 2024',
+    description: 'Managed the financial affairs of the E-Commerce Logistics Student Association.',
+    highlights: [
+      'Responsible for financial planning & oversight',
+      'Maintained accurate financial records'
+    ]
+  },
+  {
+    id: 4,
+    role: 'Secretary & Treasurer',
+    company: 'Anagata 2024 (New Student Orientation)',
+    period: '2024',
+    description: 'Served in key leadership roles for the new student orientation event \'Anagata 2024\', focusing on finance and administration.',
+    highlights: [
+      'Coordinated administrative tasks',
+      'Managed financial records & budgets'
+    ]
+  },
+  {
+    id: 5,
+    role: 'Head of Fresh Money Division',
+    company: 'Ashandya 2023 (Cultural Events)',
+    period: '2023',
+    description: 'Led fundraising initiatives for the cultural event \'Ashandya 2023\'.',
+    highlights: [
+      'Led fundraising initiatives'
+    ]
+  },
+  {
+    id: 6,
+    role: 'Event Division',
+    company: 'Anagata 2023 (New Student Orientation)',
+    period: '2023',
+    description: 'Contributed to the event organization team for Anagata 2023.',
+    highlights: [
+      'Assisted in event planning and execution'
+    ]
+  },
+  {
+    id: 7,
+    role: 'Equipment & Logistics Division',
+    company: 'Outbound WMK FB UMN 2024 (Digital Entrepreneurship Event)',
+    period: '2024',
+    description: 'Managed equipment and logistics for the digital entrepreneurship event.',
+    highlights: [
+      'Managed equipment and logistics'
+    ]
+  },
+  {
+    id: 8,
+    role: 'Committee',
+    company: 'MNP Campus Visit Committee 2023',
+    period: '2023',
+    description: 'Served as a committee member for the MNP Campus Visit.',
+    highlights: [
+      'Contributed to campus visit organization'
+    ]
   },
 ]
 
 const education = [
   {
     id: 1,
-    role: 'Bachelor of Computer Science',
-    company: 'University of Technology',
-    period: '2015 - 2019',
-    description: 'Graduated with honors. Specialized in software engineering and human-computer interaction.',
-    highlights: ['GPA 3.8/4.0', 'Dean\'s List', 'Research assistant']
+    role: 'E-Commerce Logistics Major',
+    company: 'Multimedia Nusantara Polytechnic',
+    period: '2022 - Present',
+    description: 'Currently pursuing a degree with a strong academic record, maintaining a high GPA and recognized as a scholarship recipient.',
+    highlights: [
+      'GPA: 3.84/4.0',
+      'Scholarship recipient'
+    ]
   },
   {
     id: 2,
-    role: 'Full Stack Bootcamp',
-    company: 'Code Academy Pro',
-    period: '2019',
-    description: 'Intensive 12-week program covering modern web development stack from frontend to deployment.',
-    highlights: ['React/Node.js', 'MongoDB', 'AWS deployment']
-  },
-  {
-    id: 3,
-    role: 'Various Certifications',
-    company: 'Online Platforms',
-    period: '2019 - Present',
-    description: 'Continuous learning through various online certifications and courses.',
-    highlights: ['AWS Certified', 'Google Analytics', 'UI/UX Design']
+    role: 'Certifications & Achievements',
+    company: 'Various Platforms',
+    period: '2023 - 2024',
+    description: 'Participated in various online courses and training sessions to enhance technical skills and professional knowledge.',
+    highlights: [
+      'Samsung Innovation Campus Batch 5',
+      'DQ Lab Data Analysis and Visualization',
+      'Disaster Preparedness & Post-Disaster Resilience'
+    ]
   },
 ]
 
 const tabs: { id: ExperienceTab; label: string; sublabel: string }[] = [
   { id: 'work', label: 'WORK', sublabel: 'Professional Experience' },
-  { id: 'organization', label: 'ORGANIZATION', sublabel: 'Community & Volunteer' },
+  { id: 'organization', label: 'ORGANIZATION', sublabel: 'Leadership & Involvement' },
   { id: 'education', label: 'EDUCATION', sublabel: 'Learning Journey' },
 ]
 

@@ -6,23 +6,23 @@ import { useGameStore } from '@/lib/store'
 import { FloatingElement } from './parallax-section'
 
 const socialLinks = [
-  { name: 'GITHUB', url: 'https://github.com', icon: 'GH' },
-  { name: 'LINKEDIN', url: 'https://linkedin.com', icon: 'IN' },
-  { name: 'TWITTER', url: 'https://twitter.com', icon: 'TW' },
-  { name: 'DRIBBBLE', url: 'https://dribbble.com', icon: 'DR' },
+  { name: 'GITHUB', url: 'https://github.com/StevenYoe', icon: 'GH' },
+  { name: 'LINKEDIN', url: 'https://www.linkedin.com/in/steven-yoe88', icon: 'LD' },
+  { name: 'INSTAGRAM', url: 'https://www.instagram.com/stevenyoe88', icon: 'IG' },
+  { name: 'WEBSITE', url: 'https://stevenyoe.is-a.dev', icon: 'WS' },
 ]
 
 const contactMethods = [
   { 
     label: 'EMAIL ME', 
-    value: 'hello@yourname.com', 
-    href: 'mailto:hello@yourname.com',
+    value: 'stevenyoe80@gmail.com', 
+    href: 'mailto:stevenyoe80@gmail.com',
     description: 'For business inquiries'
   },
   { 
     label: 'CHAT ON WHATSAPP', 
-    value: '+62 812 3456 7890', 
-    href: 'https://wa.me/6281234567890',
+    value: '+62 851 8308 8865', 
+    href: 'https://wa.me/6285183088865',
     description: 'Fast response, available 24/7'
   },
 ]
@@ -425,7 +425,7 @@ export function ContactSection() {
         className="absolute bottom-0 left-0 right-0 py-8"
       >
         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <span>2026 YOUR NAME. All rights reserved.</span>
+          <span>2026 STEVEN. All rights reserved.</span>
           <motion.span 
             className="font-display tracking-wider" 
             style={{ color: accent }}

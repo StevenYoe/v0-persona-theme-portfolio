@@ -76,7 +76,7 @@ export function HeroSection() {
       title: 'MEMENTO',
       subtitle: 'MORI',
       accent: '#00d4ff',
-      tagline: 'Remember, you will die.',
+      tagline: 'The Arcana is the means by which all is revealed.',
     },
     'persona-4': {
       title: 'REACH OUT',
@@ -394,13 +394,13 @@ export function HeroSection() {
             className="mt-16"
           >
             <p className="text-sm tracking-[0.4em] text-muted-foreground mb-3">
-              CREATIVE DEVELOPER
+              BACKEND & QA SPECIALIST
             </p>
             <h2 
               className="font-display text-5xl md:text-7xl tracking-wider"
               style={{ color: config.accent }}
             >
-              YOUR NAME
+              STEVEN
             </h2>
           </motion.div>
 

@@ -8,57 +8,61 @@ import { useGameStore } from '@/lib/store'
 const projects = [
   {
     id: 1,
-    title: 'Project Velvet',
-    category: 'Web Application',
-    description: 'A sophisticated SaaS platform with real-time collaboration features.',
-    fullDescription: 'Project Velvet is a comprehensive SaaS platform designed for remote teams. It features real-time document collaboration, video conferencing integration, and advanced project management tools. Built with a focus on performance and user experience.',
-    tags: ['React', 'Node.js', 'WebSocket'],
-    year: '2025',
-    features: ['Real-time sync', 'Video chat', 'Task management', 'Analytics dashboard'],
-    image: '/images/project-velvet.jpg',
-    link: '#'
+    title: 'Persona Theme Portfolio',
+    category: 'Frontend Development',
+    description: 'An interactive and animated portfolio website inspired by the Persona game series UI/UX.',
+    fullDescription: 'This portfolio is a personal project designed to showcase my frontend development skills. It is built with Next.js and heavily utilizes Framer Motion for complex animations and page transitions, creating a dynamic and engaging user experience reminiscent of the Persona game series. The entire interface, from the custom cursor to the themed menus, is designed to be interactive and visually cohesive.',
+    tags: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
+    year: '2026',
+    features: [
+      'Game-inspired UI/UX',
+      'Complex animations & transitions',
+      'Theme-switching functionality',
+      'Interactive custom components'
+    ],
+    image: '/images/portfolio.webp',
+    link: 'https://stevenyoe.is-a.dev/'
   },
   {
     id: 2,
-    title: 'Midnight Hour',
-    category: 'Mobile App',
-    description: 'Sleep tracking application with AI-powered insights and recommendations.',
-    fullDescription: 'Midnight Hour uses machine learning to analyze sleep patterns and provide personalized recommendations for better rest. The app integrates with various wearables and smart home devices to create an optimal sleep environment.',
-    tags: ['React Native', 'TensorFlow', 'Firebase'],
-    year: '2024',
-    features: ['AI analysis', 'Wearable sync', 'Smart alarms', 'Sleep reports'],
-    image: '/images/project-midnight.jpg',
-    link: '#'
+    title: 'Pazar Brand & Company Website',
+    category: 'Full-stack Development',
+    description: 'Independently developed a complete company website with responsive design and robust backend system.',
+    fullDescription: 'As a Full-stack Developer, I independently designed and developed a comprehensive company website with a responsive user interface. I built a robust backend system integrated with a solid database architecture, significantly enhancing the company\'s digital presence through modern web technologies.',
+    tags: ['Laravel', 'PHP', 'Tailwind CSS', 'MySQL', 'Responsive Design'],
+    year: '2025',
+    features: [
+      'Complete responsive company website',
+      'Robust backend system',
+      'Comprehensive database architecture',
+      'Enhanced digital presence'
+    ],
+    image: '/images/pazar.webp',
+    link: 'https://bumbupazar.com/'
   },
   {
     id: 3,
-    title: 'Shadow World',
-    category: 'E-Commerce',
-    description: 'High-performance e-commerce platform with immersive 3D product views.',
-    fullDescription: 'Shadow World revolutionizes online shopping with interactive 3D product visualization. Customers can examine products from every angle, customize options in real-time, and experience AR try-on features for select categories.',
-    tags: ['Next.js', 'Three.js', 'Stripe'],
+    title: 'Rese Corner\'s Website',
+    category: 'Project Management & Backend Development',
+    description: 'Managed communication between development teams and developed backend systems.',
+    fullDescription: 'In this role, I served as both Project Manager and Programmer, overseeing the communication between backend and frontend development teams. My primary focus was on developing robust backend systems, and I also contributed to the frontend development efforts to ensure seamless integration and functionality.',
+    tags: ['Laravel', 'PHP', 'MySQL', 'Responsive Design'],
     year: '2024',
-    features: ['3D viewer', 'AR try-on', 'One-click checkout', 'Inventory sync'],
-    image: '/images/project-shadow.jpg',
-    link: '#'
-  },
-  {
-    id: 4,
-    title: 'Phantom Thief',
-    category: 'Game Development',
-    description: 'Browser-based puzzle game with stunning visual effects.',
-    fullDescription: 'Phantom Thief is an atmospheric puzzle game that runs entirely in the browser. Players solve intricate heist-themed puzzles while enjoying cinematic visuals and an original soundtrack. Features 50+ levels with increasing complexity.',
-    tags: ['Canvas', 'GSAP', 'Howler.js'],
-    year: '2023',
-    features: ['50+ levels', 'Leaderboards', 'Achievements', 'Cloud saves'],
-    image: '/images/project-phantom.jpg',
-    link: '#'
+    features: [
+      'Managed cross-team communication',
+      'Developed core backend systems',
+      'Assisted frontend integration',
+      'Ensured seamless functionality'
+    ],
+    image: '/images/rese-corner.webp',
+    link: 'http://resecorner.com/'
   },
 ]
 
 export function ProjectsSection() {
   const theme = useGameStore((state) => state.theme)
   const containerRef = useRef<HTMLDivElement>(null)
+  const scrollableRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [selectedProject, setSelectedProject] = useState<typeof projects[0] | null>(null)
   const [isImageError, setIsImageError] = useState(false)
@@ -72,17 +76,38 @@ export function ProjectsSection() {
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const element = scrollableRef.current
+    if (!element) return
+
+    // Prevent scroll leak at boundaries
+    const atTop = element.scrollTop === 0 && e.deltaY < 0
+    const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 1 && e.deltaY > 0
+
+    if (atTop || atBottom) {
+      e.preventDefault()
+      e.stopPropagation()
+      return
+    }
+
+    // Allow native scroll, but stop it from reaching Lenis
+    e.stopPropagation()
+  }
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (selectedProject) {
       document.body.style.overflow = 'hidden'
-      // Reset image error state when a new project is selected
+      document.documentElement.style.overflow = 'hidden'
       setIsImageError(false)
     } else {
       document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
     }
+
     return () => {
       document.body.style.overflow = ''
+      document.documentElement.style.overflow = ''
     }
   }, [selectedProject])
 
@@ -192,9 +217,9 @@ export function ProjectsSection() {
                   {/* Tags & Button */}
                   <div className="md:col-span-3 flex flex-col gap-4">
                     <div className="flex flex-wrap gap-2">
-                      {project.tags.map((tag) => (
+                      {project.tags.map((tag, i) => (
                         <span 
-                          key={tag}
+                          key={`${tag}-${i}`}
                           className={`px-3 py-1 text-xs tracking-wider ${
                             theme === 'persona-3' ? 'rounded' : ''
                           }`}
@@ -206,8 +231,7 @@ export function ProjectsSection() {
                           {tag}
                         </span>
                       ))}
-                    </div>
-                    
+                    </div>                    
                     {/* View Details Button */}
                     <motion.button
                       onClick={(e) => {
@@ -270,38 +294,40 @@ export function ProjectsSection() {
               exit={{ scale: 0.9, y: 50, opacity: 0 }}
               transition={{ type: 'spring', damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className={`relative z-10 w-full max-w-5xl max-h-[90vh] overflow-y-auto border-2 ${
+              className={`relative z-10 w-full max-w-5xl h-[90vh] flex flex-col border-2 overflow-hidden ${
                 theme === 'persona-5' ? '-skew-x-2' : theme === 'persona-3' ? 'rounded-xl' : ''
               }`}
               style={{ 
                 backgroundColor: 'var(--card)',
                 borderColor: accent,
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none'
               }}
             >
-              <style jsx>{`
-                div::-webkit-scrollbar {
-                  display: none;
-                }
-              `}</style>
-              
-              <div className={`p-8 md:p-12 ${theme === 'persona-5' ? 'skew-x-2' : ''}`}>
-                {/* Close button */}
-                <motion.button
-                  onClick={() => setSelectedProject(null)}
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  className={`absolute top-4 right-4 md:top-6 md:right-6 w-12 h-12 flex items-center justify-center z-10 ${
-                    theme === 'persona-3' ? 'rounded-full' : theme === 'persona-5' ? 'rotate-45' : ''
-                  }`}
-                  style={{ 
-                    backgroundColor: accent,
-                    color: theme === 'persona-4' ? '#1a1510' : '#fff'
-                  }}
-                >
-                  <span className={`font-display text-xl ${theme === 'persona-5' ? '-rotate-45' : ''}`}>X</span>
-                </motion.button>
+              {/* Close button */}
+              <motion.button
+                onClick={() => setSelectedProject(null)}
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                className={`absolute top-4 right-4 md:top-6 md:right-6 w-12 h-12 flex items-center justify-center z-10 ${
+                  theme === 'persona-3' ? 'rounded-full' : theme === 'persona-5' ? 'rotate-45' : ''
+                }`}
+                style={{ 
+                  backgroundColor: accent,
+                  color: theme === 'persona-4' ? '#1a1510' : '#fff'
+                }}
+              >
+                <span className={`font-display text-xl ${theme === 'persona-5' ? '-rotate-45' : ''}`}>X</span>
+              </motion.button>
 
+              {/* New scrollable content wrapper */}
+              <div 
+                ref={scrollableRef}
+                onWheel={handleWheel}
+                className={`p-8 md:p-12 flex-grow overflow-y-auto ${theme === 'persona-5' ? 'skew-x-2' : ''}`}
+                style={{ // Apply scrollbar hiding here
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none'
+                }}
+              >
                 <div className="grid md:grid-cols-2 gap-8 md:gap-12">
                   {/* Left: Image */}
                   <div>
@@ -376,9 +402,9 @@ export function ProjectsSection() {
                         TECHNOLOGIES
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {selectedProject.tags.map((tag) => (
+                        {selectedProject.tags.map((tag, i) => (
                           <span 
-                            key={tag}
+                            key={`${tag}-${i}`}
                             className={`px-4 py-2 font-display tracking-wider ${
                               theme === 'persona-3' ? 'rounded-lg' : ''
                             }`}
@@ -444,7 +470,7 @@ export function ProjectsSection() {
                       <div className="grid grid-cols-2 gap-3">
                         {selectedProject.features.map((feature, i) => (
                           <motion.div
-                            key={feature}
+                            key={`${feature}-${i}`}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.4 + i * 0.1 }}

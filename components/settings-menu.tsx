@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useGameStore, type PersonaTheme } from '@/lib/store'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
+import { getAudioPlayerInstance } from '@/components/audio-manager'
 
 const themeOptions: { id: PersonaTheme; label: string; description: string }[] = [
   { id: 'persona-3', label: 'PERSONA 3', description: 'Blue Moon / Memento Mori' },
@@ -38,6 +39,7 @@ export function SettingsMenu() {
   const setSfxVolume = useGameStore((state) => state.setSfxVolume)
   const cursorEnabled = useGameStore((state) => state.cursorEnabled)
   const toggleCursor = useGameStore((state) => state.toggleCursor)
+  const sfxEnabled = useGameStore((state) => state.sfxEnabled)
   
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [themeIndex, setThemeIndex] = useState(
@@ -46,7 +48,17 @@ export function SettingsMenu() {
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
+  const playSelectSfx = useCallback(() => {
+    if (sfxEnabled) {
+      const player = getAudioPlayerInstance()
+      if (player) {
+        player.playSFX('select', sfxVolume)
+      }
+    }
+  }, [sfxEnabled, sfxVolume])
+
   const handleAction = useCallback((itemId: string, direction?: 'left' | 'right') => {
+    playSelectSfx()
     switch (itemId) {
       case 'theme':
         if (direction === 'left') {
@@ -80,7 +92,7 @@ export function SettingsMenu() {
         goBack()
         break
     }
-  }, [themeIndex, setTheme, musicVolume, setMusicVolume, sfxVolume, setSfxVolume, toggleCursor, goBack])
+  }, [themeIndex, setTheme, musicVolume, setMusicVolume, sfxVolume, setSfxVolume, toggleCursor, goBack, playSelectSfx])
 
   // Keyboard navigation
   useEffect(() => {
@@ -90,12 +102,14 @@ export function SettingsMenu() {
         case 'w':
         case 'W':
           e.preventDefault()
+          playSelectSfx()
           setSelectedIndex((prev) => (prev - 1 + settingItems.length) % settingItems.length)
           break
         case 'ArrowDown':
         case 's':
         case 'S':
           e.preventDefault()
+          playSelectSfx()
           setSelectedIndex((prev) => (prev + 1) % settingItems.length)
           break
         case 'ArrowLeft':
@@ -113,6 +127,7 @@ export function SettingsMenu() {
         case 'Enter':
         case ' ':
           e.preventDefault()
+          playSelectSfx()
           if (settingItems[selectedIndex].id === 'back') {
             goBack()
           } else if (settingItems[selectedIndex].type === 'toggle') {
@@ -121,6 +136,7 @@ export function SettingsMenu() {
           break
         case 'Escape':
           e.preventDefault()
+          playSelectSfx()
           goBack()
           break
       }
@@ -128,7 +144,7 @@ export function SettingsMenu() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedIndex, handleAction, goBack])
+  }, [selectedIndex, handleAction, goBack, playSelectSfx])
 
   return (
     <motion.div
@@ -265,7 +281,10 @@ export function SettingsMenu() {
                           value={[musicVolume]}
                           max={100}
                           step={10}
-                          onValueChange={(value) => setMusicVolume(value[0])}
+                          onValueChange={(value) => {
+                            setMusicVolume(value[0])
+                            playSelectSfx()
+                          }}
                           className="w-32 sm:w-48 md:w-64"
                           style={{ 
                             '--slider-track': `${accent}30`,
@@ -302,7 +321,10 @@ export function SettingsMenu() {
                           value={[sfxVolume]}
                           max={100}
                           step={10}
-                          onValueChange={(value) => setSfxVolume(value[0])}
+                          onValueChange={(value) => {
+                            setSfxVolume(value[0])
+                            playSelectSfx()
+                          }}
                           className="w-32 sm:w-48 md:w-64"
                           style={{ 
                             '--slider-track': `${accent}30`,
@@ -329,7 +351,10 @@ export function SettingsMenu() {
                     {item.id === 'cursor' && (
                       <Switch
                         checked={cursorEnabled}
-                        onCheckedChange={toggleCursor}
+                        onCheckedChange={() => {
+                          toggleCursor()
+                          playSelectSfx()
+                        }}
                         style={{
                           backgroundColor: cursorEnabled ? accent : 'var(--secondary)'
                         }}
@@ -338,7 +363,10 @@ export function SettingsMenu() {
 
                     {item.id === 'back' && (
                       <button
-                        onClick={goBack}
+                        onClick={() => {
+                          goBack()
+                          playSelectSfx()
+                        }}
                         className="font-display text-base sm:text-xl tracking-wider px-4 sm:px-6 py-1 sm:py-2 border-2 hover:bg-accent/20 transition-colors"
                         style={{ borderColor: accent, color: accent }}
                       >

@@ -272,7 +272,7 @@ export function MainMenu() {
             } ${theme === 'persona-3' ? 'neon-glow' : ''}`}
             style={{ color: accent }}
           >
-            PORTFOLIO
+            STEVEN'S PORTFOLIO
           </h1>
           <motion.div
             initial={{ scaleX: 0 }}

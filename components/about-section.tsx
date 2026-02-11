@@ -1,19 +1,22 @@
 "use client"
 
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react' // Added useCallback
 import Image from 'next/image'
 import { useGameStore } from '@/lib/store'
 import { ParallaxSection, FloatingElement } from './parallax-section'
+import { getAudioPlayerInstance } from '@/components/audio-manager' // Added import for audio manager
 
 export function AboutSection() {
   const theme = useGameStore((state) => state.theme)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isImageError, setIsImageError] = useState(false)
+  const sfxEnabled = useGameStore((state) => state.sfxEnabled) // Get sfxEnabled state
+  const sfxVolume = useGameStore((state) => state.sfxVolume) // Get sfxVolume state
   
   // Define the path for the profile image.
   // An empty string will cause the placeholder to be shown.
-  const profileImagePath = '' // e.g., '/images/profile.jpg'
+  const profileImagePath = '/images/profile-picture.jpg'
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -32,17 +35,26 @@ export function AboutSection() {
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
   const stats = [
-    { number: '5+', label: 'Years Experience' },
-    { number: '50+', label: 'Projects Completed' },
-    { number: '30+', label: 'Happy Clients' },
+    { number: '3', label: 'Internship Experience' },
+    { number: '5+', label: 'Web Projects' },
+    { number: '3+', label: 'Happy Clients' },
     { number: '100%', label: 'Dedication' },
   ]
 
+  const playSelectSfx = useCallback(() => {
+    if (sfxEnabled) {
+      const player = getAudioPlayerInstance()
+      if (player) {
+        player.playSFX('select', sfxVolume)
+      }
+    }
+  }, [sfxEnabled, sfxVolume])
+
   const handleDownloadCV = () => {
-    // Create a sample CV download
+    playSelectSfx() // Play SFX on download
     const link = document.createElement('a')
-    link.href = '/cv.pdf'
-    link.download = 'CV_YourName.pdf'
+    link.href = '/CV_Steven.pdf' // Corrected path
+    link.download = 'CV_Steven.pdf' // Corrected filename
     link.click()
   }
 
@@ -298,15 +310,10 @@ export function AboutSection() {
                 className="space-y-4 text-muted-foreground text-lg leading-relaxed"
               >
                 <p>
-                  I am a passionate creative developer who transforms ideas into 
-                  immersive digital experiences. With a keen eye for design and 
-                  a love for clean code, I bridge the gap between aesthetics and 
-                  functionality.
+                  As a highly analytical E-Commerce Logistics student, I specialize in Backend Development and Quality Assurance. My passion lies in building robust server-side logic and ensuring software excellence.
                 </p>
                 <p>
-                  Every project is an opportunity to push boundaries and create 
-                  something extraordinary that resonates with users and stands 
-                  the test of time.
+                  With a proven track record in manual testing for high-traffic mobile applications (Alfagift) and designing comprehensive database architectures, I am a self-driven learner proficient in SQL/NoSQL databases, with a growing focus on Automation Testing and system optimization.
                 </p>
               </motion.div>
 

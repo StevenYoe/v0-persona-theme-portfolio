@@ -95,62 +95,69 @@ class AudioPlayer {
     if (this.isPlaying) return
     this.isPlaying = true
 
-    this.fadeOut(() => {
-      if (this.bgm) {
-        this.bgm.pause()
-        this.bgm.src = '' // Release resource
-      }
-      
-      this.bgm = new Audio(this.getBgmPath())
-      this.bgm.loop = true
-      this.bgm.volume = 0
-      
-      const playPromise = this.bgm.play()
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          this.fadeIn()
-        }).catch(error => {
-          console.warn('Audio playback failed to start:', error)
-          this.isPlaying = false
-        })
-      }
-    })
+    if (this.bgm) {
+      this.bgm.pause()
+      this.bgm.src = '' // Release resource
+      this.bgm = null
+    }
+    
+    this.bgm = new Audio(this.getBgmPath())
+    this.bgm.loop = true
+    this.bgm.volume = this.volume // Set volume directly
+    
+    const playPromise = this.bgm.play()
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Audio started successfully, no need to fadeIn from 0 if volume is set
+      }).catch(error => {
+        console.warn('Audio playback failed to start:', error)
+        this.isPlaying = false
+      })
+    }
   }
   
   stop() {
     if (!this.isPlaying) return
     this.isPlaying = false
     
-    this.fadeOut(() => {
-      if (this.bgm) {
-        this.bgm.pause()
-        this.bgm.currentTime = 0
-        this.bgm.src = '' // Release resource
-        this.bgm = null
-      }
-    })
+    if (this.bgm) {
+      this.bgm.pause()
+      this.bgm.currentTime = 0
+      this.bgm.src = '' // Release resource
+      this.bgm = null
+    }
   }
 
   private changeTrack() {
-    if (!this.isPlaying) return
-    
-    this.fadeOut(() => {
-      if (this.bgm) {
-        this.bgm.pause()
-      }
-      
-      this.bgm = new Audio(this.getBgmPath())
-      this.bgm.loop = true
-      
-      const playPromise = this.bgm.play()
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          this.fadeIn()
-        }).catch(error => {
-          console.warn('Audio playback failed on track change:', error)
-        })
-      }
-    })
+    // If music is explicitly stopped, don't change track.
+    // Otherwise, ensure track changes and plays.
+    if (!useGameStore.getState().musicEnabled) {
+      this.stop(); // Ensure it's stopped if music is disabled
+      return;
+    }
+
+    // Stop current track if playing
+    if (this.bgm) {
+      this.bgm.pause();
+      this.bgm.src = ''; // Release resource
+      this.bgm = null;
+    }
+
+    this.bgm = new Audio(this.getBgmPath());
+    this.bgm.loop = true;
+    this.bgm.volume = this.volume; // Ensure volume is set
+
+    const playPromise = this.bgm.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        this.isPlaying = true; // Ensure isPlaying is true on successful track change
+      }).catch(error => {
+        console.warn('Audio playback failed on track change:', error);
+        this.isPlaying = false;
+      });
+    } else {
+      this.isPlaying = true; // Assume playing if no promise (sync play)
+    }
   }
 
   setVolume(vol: number) {
@@ -201,6 +208,10 @@ class AudioPlayer {
 // Keep a single instance
 let audioPlayer: AudioPlayer | null = null
 
+export function getAudioPlayerInstance() {
+  return audioPlayer
+}
+
 export function AudioManager() {
   const store = useGameStore()
   const isInitialized = useRef(false)
@@ -221,10 +232,15 @@ export function AudioManager() {
       audioPlayer.play()
     }
     
+    // Explicitly play a select SFX on first interaction/initialization
+    if (store.sfxEnabled && audioPlayer) { // Only if SFX is enabled and player is ready
+      audioPlayer.playSFX('select', store.sfxVolume)
+    }
+    
     // Remove listeners once done
     window.removeEventListener('click', initAudio)
     window.removeEventListener('keydown', initAudio)
-  }, [store.theme, store.musicLocation, store.musicVolume, store.musicEnabled])
+  }, [store.theme, store.musicLocation, store.musicVolume, store.musicEnabled, store.sfxEnabled, store.sfxVolume])
   
   // Setup first interaction listener
   useEffect(() => {

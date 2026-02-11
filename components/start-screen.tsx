@@ -1,17 +1,30 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/lib/store';
+import { getAudioPlayerInstance } from '@/components/audio-manager';
 
 export function StartScreen() {
   const setScreen = useGameStore((state) => state.setScreen);
   const theme = useGameStore((state) => state.theme);
+  const sfxEnabled = useGameStore((state) => state.sfxEnabled);
+  const sfxVolume = useGameStore((state) => state.sfxVolume);
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
+  const playSelectSfx = useCallback(() => {
+    if (sfxEnabled) {
+      const player = getAudioPlayerInstance()
+      if (player) {
+        player.playSFX('select', sfxVolume)
+      }
+    }
+  }, [sfxEnabled, sfxVolume])
+
   useEffect(() => {
     const handleInteraction = () => {
+      playSelectSfx();
       setScreen('main-menu');
     };
 
@@ -22,7 +35,7 @@ export function StartScreen() {
       window.removeEventListener('keydown', handleInteraction);
       window.removeEventListener('click', handleInteraction);
     };
-  }, [setScreen]);
+  }, [setScreen, playSelectSfx]);
 
   return (
     <motion.div

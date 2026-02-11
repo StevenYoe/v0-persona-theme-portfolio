@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback } from 'react'
 import { useGameStore } from '@/lib/store'
+import { getAudioPlayerInstance } from '@/components/audio-manager'
 
 const menuItems = [
   { id: 'resume', label: 'RESUME', sublabel: 'Continue Viewing' },
@@ -25,6 +26,8 @@ export function PauseMenu() {
   const closePauseMenu = useGameStore((state) => state.closePauseMenu)
   const setScreen = useGameStore((state) => state.setScreen)
   const returnToMainMenu = useGameStore((state) => state.returnToMainMenu)
+  const sfxEnabled = useGameStore((state) => state.sfxEnabled)
+  const sfxVolume = useGameStore((state) => state.sfxVolume)
   
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [activeTab, setActiveTab] = useState<'menu' | 'navigation'>('menu')
@@ -36,14 +39,25 @@ export function PauseMenu() {
 
   const currentItems = activeTab === 'menu' ? menuItems : navItems
 
+  const playSelectSfx = useCallback(() => {
+    if (sfxEnabled) {
+      const player = getAudioPlayerInstance()
+      if (player) {
+        player.playSFX('select', sfxVolume)
+      }
+    }
+  }, [sfxEnabled, sfxVolume])
+
   const handleConfirmMainMenu = useCallback((confirmed: boolean) => {
+    playSelectSfx()
     setShowConfirmDialog(false)
     if (confirmed) {
       returnToMainMenu()
     }
-  }, [returnToMainMenu])
+  }, [returnToMainMenu, playSelectSfx])
 
   const handleSelect = useCallback((id: string) => {
+    playSelectSfx()
     if (activeTab === 'menu') {
       switch (id) {
         case 'resume':
@@ -67,7 +81,7 @@ export function PauseMenu() {
         }, 300)
       }
     }
-  }, [activeTab, closePauseMenu, setScreen])
+  }, [activeTab, closePauseMenu, setScreen, playSelectSfx])
 
   // Reset selection when tab changes
   useEffect(() => {
@@ -84,6 +98,7 @@ export function PauseMenu() {
         switch (e.key) {
           case 'Escape':
             e.preventDefault()
+            playSelectSfx()
             setShowConfirmDialog(false)
             break
           case 'ArrowLeft':
@@ -93,6 +108,7 @@ export function PauseMenu() {
           case 'd':
           case 'D':
             e.preventDefault()
+            playSelectSfx()
             setConfirmSelectedIndex((prev) => (prev === 0 ? 1 : 0))
             break
           case 'Enter':
@@ -108,30 +124,35 @@ export function PauseMenu() {
       switch (e.key) {
         case 'Escape':
           e.preventDefault()
+          playSelectSfx()
           closePauseMenu()
           break
         case 'ArrowUp':
         case 'w':
         case 'W':
           e.preventDefault()
+          playSelectSfx()
           setSelectedIndex((prev) => (prev - 1 + currentItems.length) % currentItems.length)
           break
         case 'ArrowDown':
         case 's':
         case 'S':
           e.preventDefault()
+          playSelectSfx()
           setSelectedIndex((prev) => (prev + 1) % currentItems.length)
           break
         case 'ArrowLeft':
         case 'a':
         case 'A':
           e.preventDefault()
+          playSelectSfx()
           setActiveTab('menu')
           break
         case 'ArrowRight':
         case 'd':
         case 'D':
           e.preventDefault()
+          playSelectSfx()
           setActiveTab('navigation')
           break
         case 'Enter':
@@ -144,7 +165,7 @@ export function PauseMenu() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isVisible, selectedIndex, closePauseMenu, handleSelect, currentItems, showConfirmDialog, confirmSelectedIndex, handleConfirmMainMenu])
+  }, [isVisible, selectedIndex, closePauseMenu, handleSelect, currentItems, showConfirmDialog, confirmSelectedIndex, handleConfirmMainMenu, playSelectSfx])
 
   return (
     <AnimatePresence>
@@ -163,7 +184,10 @@ export function PauseMenu() {
             exit={{ opacity: 0 }}
             className="absolute inset-0"
             style={{ backgroundColor: 'var(--background)' }}
-            onClick={closePauseMenu}
+            onClick={() => {
+              closePauseMenu()
+              playSelectSfx()
+            }}
           />
 
           {/* Animated background pattern */}
@@ -247,7 +271,10 @@ export function PauseMenu() {
                 <motion.button
                   key={tab.id}
                   data-sfx-interactive
-                  onClick={() => setActiveTab(tab.id as 'menu' | 'navigation')}
+                  onClick={() => {
+                    setActiveTab(tab.id as 'menu' | 'navigation')
+                    playSelectSfx()
+                  }}
                   className={`px-6 py-3 font-display text-lg tracking-wider transition-all ${
                     theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''
                   }`}
@@ -387,7 +414,10 @@ export function PauseMenu() {
                   animate={{ opacity: 0.8 }}
                   exit={{ opacity: 0 }}
                   className="absolute inset-0 bg-background"
-                  onClick={() => setShowConfirmDialog(false)}
+                  onClick={() => {
+                    setShowConfirmDialog(false)
+                    playSelectSfx()
+                  }}
                 />
 
                 {/* Dialog */}

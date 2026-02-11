@@ -7,58 +7,47 @@ import { ParallaxSection, FloatingElement } from './parallax-section'
 
 const skills = [
   { 
-    name: 'React / Next.js', 
-    icon: '⚛',
-    description: 'Building modern web applications with server-side rendering and static generation',
-    category: 'Frontend'
+    name: 'Quality Assurance', 
+    icon: '✅',
+    description: 'Manual testing for high-traffic mobile apps, defect reporting (Jira), and comprehensive test scenarios.',
+    category: 'Testing'
   },
   { 
-    name: 'TypeScript', 
-    icon: 'TS',
-    description: 'Type-safe development for scalable and maintainable codebases',
+    name: 'Backend Development', 
+    icon: '⚙️',
+    description: 'Expertise in Laravel, Node.js, and Next.js for robust server-side logic and API development.',
+    category: 'Development'
+  },
+  { 
+    name: 'Database Management', 
+    icon: '🗄️',
+    description: 'Proficient in MySQL, MongoDB, PostgreSQL, and Redis for scalable data solutions.',
+    category: 'Data'
+  },
+  { 
+    name: 'Programming Languages', 
+    icon: '💻',
+    description: 'Skilled in PHP, Python, C, C++, JavaScript, and C# for diverse development needs.',
     category: 'Language'
   },
   { 
-    name: 'UI/UX Design', 
-    icon: '◈',
-    description: 'Creating intuitive and beautiful user interfaces with attention to detail',
-    category: 'Design'
+    name: 'Frontend Development', 
+    icon: '🌐',
+    description: 'Experienced with ReactJS, Next.js, and jQuery for dynamic and responsive user interfaces.',
+    category: 'Development'
   },
-  { 
-    name: 'Node.js', 
-    icon: '⬢',
-    description: 'Backend development with Express, REST APIs, and server architecture',
-    category: 'Backend'
-  },
-  { 
-    name: 'Three.js / WebGL', 
-    icon: '△',
-    description: '3D graphics and immersive web experiences',
-    category: 'Graphics'
-  },
-  { 
-    name: 'Motion Design', 
-    icon: '◎',
-    description: 'Fluid animations and micro-interactions for delightful UX',
-    category: 'Animation'
-  },
-  { 
-    name: 'Database', 
-    icon: '⊞',
-    description: 'SQL, NoSQL, and database optimization techniques',
-    category: 'Backend'
-  },
-  { 
-    name: 'DevOps', 
-    icon: '⚙',
-    description: 'CI/CD pipelines, containerization, and cloud deployment',
-    category: 'Operations'
+  {
+    name: 'Data Analysis',
+    icon: '📊',
+    description: 'Competent in Google Colab, R Studio, Tableau, and Power BI for insightful data interpretation.',
+    category: 'Data'
   },
 ]
 
 const tools = [
-  'Figma', 'VS Code', 'Git', 'Docker', 
-  'Framer', 'Blender', 'After Effects', 'Photoshop'
+  'DBeaver', 'Postman', 'GitHub', 'VS Code', 'Canva', 'Figma',
+  'Google Colab', 'R Studio', 'Tableau', 'Power BI', 'Vmix', 'OBS', 'Odoo',
+  'Word', 'Excel', 'PowerPoint'
 ]
 
 export function SkillsSection() {

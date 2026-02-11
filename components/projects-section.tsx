@@ -29,7 +29,7 @@ const projects = [
     category: 'Full-stack Development',
     description: 'Independently developed a complete company website with responsive design and robust backend system.',
     fullDescription: 'As a Full-stack Developer, I independently designed and developed a comprehensive company website with a responsive user interface. I built a robust backend system integrated with a solid database architecture, significantly enhancing the company\'s digital presence through modern web technologies.',
-    tags: ['Laravel', 'PHP', 'Tailwind CSS', 'MySQL', 'Responsive Design'],
+    tags: ['Laravel', 'PHP', 'Tailwind CSS', 'MySQL'],
     year: '2025',
     features: [
       'Complete responsive company website',
@@ -46,7 +46,7 @@ const projects = [
     category: 'Project Management & Backend Development',
     description: 'Managed communication between development teams and developed backend systems.',
     fullDescription: 'In this role, I served as both Project Manager and Programmer, overseeing the communication between backend and frontend development teams. My primary focus was on developing robust backend systems, and I also contributed to the frontend development efforts to ensure seamless integration and functionality.',
-    tags: ['Laravel', 'PHP', 'MySQL', 'Responsive Design'],
+    tags: ['Laravel', 'PHP', 'MySQL'],
     year: '2024',
     features: [
       'Managed cross-team communication',

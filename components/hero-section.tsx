@@ -177,12 +177,12 @@ export function HeroSection() {
               {[...Array(6)].map((_, i) => (
                 <motion.div
                   key={`diamond-${i}`}
-                  animate={{ rotate: 360 }}
+                  initial={{ rotate: 45 }}
+                  animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
                   transition={{ 
                     duration: 40 + i * 10, 
                     repeat: Infinity, 
                     ease: "linear",
-                    direction: i % 2 === 0 ? 'normal' : 'reverse'
                   }}
                   className="absolute opacity-10"
                   style={{
@@ -191,7 +191,6 @@ export function HeroSection() {
                     left: `${10 + i * 15}%`,
                     top: `${5 + i * 10}%`,
                     border: `2px solid ${config.accent}`,
-                    transform: 'rotate(45deg)'
                   }}
                 />
               ))}

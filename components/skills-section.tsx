@@ -9,7 +9,7 @@ const skills = [
   { 
     name: 'Quality Assurance', 
     icon: '✅',
-    description: 'Manual testing for high-traffic mobile apps, defect reporting (Jira), and comprehensive test scenarios.',
+    description: 'Experienced in manual testing (Jira, test scenarios) and self-taught in automated testing using Selenium for web and Appium for mobile (Android).',
     category: 'Testing'
   },
   { 

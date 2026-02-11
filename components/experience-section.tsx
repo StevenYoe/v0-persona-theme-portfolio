@@ -50,9 +50,19 @@ const workExperience = [
 const organizationExperience = [
   {
     id: 1,
+    role: 'Equipment & Logistics Division',
+    company: 'Outbound WMK FB UMN 2024 (Digital Entrepreneurship Event)',
+    period: 'November 2024',
+    description: 'Managed equipment and logistics for the digital entrepreneurship event.',
+    highlights: [
+      'Managed equipment and logistics'
+    ]
+  },
+  {
+    id: 2,
     role: 'Treasurer & Head of Multimedia Division',
     company: 'Inaugurasi 2024 (Senate Session Welcoming New Students)',
-    period: '2024',
+    period: 'January - August 2024',
     description: 'Managed financial resources and multimedia aspects for the new student orientation event \'Inaugurasi 2024\'.',
     highlights: [
       'Managed budget allocation',
@@ -60,10 +70,21 @@ const organizationExperience = [
     ]
   },
   {
-    id: 2,
+    id: 3,
+    role: 'Secretary & Treasurer',
+    company: 'Anagata 2024 (New Student Orientation)',
+    period: 'January - August 2024',
+    description: 'Served in key leadership roles for the new student orientation event \'Anagata 2024\', focusing on finance and administration.',
+    highlights: [
+      'Coordinated administrative tasks',
+      'Managed financial records & budgets'
+    ]
+  },
+  {
+    id: 4,
     role: 'Treasurer',
     company: 'ECLIVAL 2024 (E-Commerce Logistics Student Association Festival)',
-    period: '2024',
+    period: 'January - August 2024',
     description: 'Handled financial management for ECLIVAL 2024, a large-scale festival organized by the E-Commerce Logistics Student Association.',
     highlights: [
       'Oversaw financial transactions & reporting',
@@ -71,7 +92,7 @@ const organizationExperience = [
     ]
   },
   {
-    id: 3,
+    id: 5,
     role: 'Treasurer',
     company: 'E-Commerce Logistics Student Association',
     period: 'January 2023 - June 2024',
@@ -82,51 +103,30 @@ const organizationExperience = [
     ]
   },
   {
-    id: 4,
-    role: 'Secretary & Treasurer',
-    company: 'Anagata 2024 (New Student Orientation)',
-    period: '2024',
-    description: 'Served in key leadership roles for the new student orientation event \'Anagata 2024\', focusing on finance and administration.',
-    highlights: [
-      'Coordinated administrative tasks',
-      'Managed financial records & budgets'
-    ]
-  },
-  {
-    id: 5,
+    id: 6,
     role: 'Head of Fresh Money Division',
     company: 'Ashandya 2023 (Cultural Events)',
-    period: '2023',
+    period: 'July - December 2023',
     description: 'Led fundraising initiatives for the cultural event \'Ashandya 2023\'.',
     highlights: [
       'Led fundraising initiatives'
     ]
   },
   {
-    id: 6,
+    id: 7,
     role: 'Event Division',
     company: 'Anagata 2023 (New Student Orientation)',
-    period: '2023',
+    period: 'January - August 2023',
     description: 'Contributed to the event organization team for Anagata 2023.',
     highlights: [
       'Assisted in event planning and execution'
     ]
   },
   {
-    id: 7,
-    role: 'Equipment & Logistics Division',
-    company: 'Outbound WMK FB UMN 2024 (Digital Entrepreneurship Event)',
-    period: '2024',
-    description: 'Managed equipment and logistics for the digital entrepreneurship event.',
-    highlights: [
-      'Managed equipment and logistics'
-    ]
-  },
-  {
     id: 8,
     role: 'Committee',
     company: 'MNP Campus Visit Committee 2023',
-    period: '2023',
+    period: 'January, June, & August 2023',
     description: 'Served as a committee member for the MNP Campus Visit.',
     highlights: [
       'Contributed to campus visit organization'

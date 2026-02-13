@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useGameStore } from '@/lib/store'
 import {
   AlertDialog,
@@ -32,6 +32,7 @@ export function MainMenu() {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [showQuitDialog, setShowQuitDialog] = useState(false)
   const [quitDialogIndex, setQuitDialogIndex] = useState(0)
+  const wasTouched = useRef(false)
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
   
@@ -74,6 +75,15 @@ export function MainMenu() {
 
   // Keyboard navigation
   useEffect(() => {
+    const handleTouchStart = () => {
+      wasTouched.current = true
+    }
+    const handleTouchEnd = () => {
+      setTimeout(() => {
+        wasTouched.current = false
+      }, 100)
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (showQuitDialog) {
         switch (e.key) {
@@ -126,7 +136,13 @@ export function MainMenu() {
     }
 
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('touchstart', handleTouchStart)
+    window.addEventListener('touchend', handleTouchEnd)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchend', handleTouchEnd)
+    }
   }, [selectedIndex, showQuitDialog, quitDialogIndex, handleSelect, playSfx])
 
   return (
@@ -317,8 +333,16 @@ export function MainMenu() {
                   ease: [0.16, 1, 0.3, 1]
                 }}
                 onClick={() => handleSelect(item.id)}
-                onMouseEnter={() => setSelectedIndex(index)}
-                onFocus={() => setSelectedIndex(index)}
+                onMouseEnter={() => {
+                  if (!wasTouched.current) {
+                    setSelectedIndex(index)
+                  }
+                }}
+                onFocus={() => {
+                  if (!wasTouched.current) {
+                    setSelectedIndex(index)
+                  }
+                }}
                 data-sfx-interactive
                 className={`w-full text-left relative group outline-none ${
                   theme === 'persona-5' ? '-skew-x-3' : ''

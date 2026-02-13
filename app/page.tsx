@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/lib/store'
+import { getAudioPlayerInstance } from '@/components/audio-manager'
 import { LenisProvider } from '@/components/lenis-provider'
 import { StartScreen } from '@/components/start-screen'
 import { MainMenu } from '@/components/main-menu'
@@ -22,25 +23,35 @@ import PreLoader from '@/components/pre-loader';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
-  const { currentScreen, openPauseMenu, theme, setScreen } = useGameStore()
+  const { currentScreen, openPauseMenu, theme, setScreen, sfxEnabled, sfxVolume } = useGameStore()
 
   // Apply theme on mount and changes
   useEffect(() => {
     document.documentElement.className = theme
   }, [theme])
 
+  const playSfx = useCallback((type: 'hover' | 'select') => {
+    if (sfxEnabled) {
+      const player = getAudioPlayerInstance()
+      if (player) {
+        player.playSFX(type, sfxVolume)
+      }
+    }
+  }, [sfxEnabled, sfxVolume])
+
   // ESC key to open pause menu
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && currentScreen === 'portfolio') {
         e.preventDefault()
+        playSfx('select')
         openPauseMenu()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [currentScreen, openPauseMenu])
+  }, [currentScreen, openPauseMenu, playSfx])
 
   if (isLoading) {
     return <PreLoader onComplete={() => setIsLoading(false)} />

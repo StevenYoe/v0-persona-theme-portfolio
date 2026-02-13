@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useGameStore } from '@/lib/store'
 import { getAudioPlayerInstance } from '@/components/audio-manager'
 
@@ -33,6 +33,7 @@ export function PauseMenu() {
   const [activeTab, setActiveTab] = useState<'menu' | 'navigation'>('menu')
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [confirmSelectedIndex, setConfirmSelectedIndex] = useState(0)
+  const wasTouched = useRef(false)
 
   const isVisible = currentScreen === 'pause-menu'
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
@@ -89,6 +90,15 @@ export function PauseMenu() {
 
   // Keyboard navigation
   useEffect(() => {
+    const handleTouchStart = () => {
+      wasTouched.current = true
+    }
+    const handleTouchEnd = () => {
+      setTimeout(() => {
+        wasTouched.current = false
+      }, 100)
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isVisible) return
       
@@ -163,7 +173,13 @@ export function PauseMenu() {
     }
 
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('touchstart', handleTouchStart)
+    window.addEventListener('touchend', handleTouchEnd)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchend', handleTouchEnd)
+    }
   }, [isVisible, selectedIndex, closePauseMenu, handleSelect, currentItems, showConfirmDialog, confirmSelectedIndex, handleConfirmMainMenu, playSfx])
 
   return (
@@ -185,7 +201,7 @@ export function PauseMenu() {
             style={{ backgroundColor: 'var(--background)' }}
             onClick={() => {
               closePauseMenu()
-              playSelectSfx()
+              playSfx('select')
             }}
           />
 
@@ -312,7 +328,11 @@ export function PauseMenu() {
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.2 + index * 0.05 }}
                       onClick={() => handleSelect(item.id)}
-                      onMouseEnter={() => setSelectedIndex(index)}
+                      onMouseEnter={() => {
+                        if (!wasTouched.current) {
+                          setSelectedIndex(index)
+                        }
+                      }}
                       className={`w-full text-left relative group outline-none ${
                         theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''
                       }`}
@@ -453,7 +473,11 @@ export function PauseMenu() {
                             key={option}
                             data-sfx-interactive
                             onClick={() => handleConfirmMainMenu(option === 'YES')}
-                            onMouseEnter={() => setConfirmSelectedIndex(i)}
+                            onMouseEnter={() => {
+                              if (!wasTouched.current) {
+                                setConfirmSelectedIndex(i)
+                              }
+                            }}
                             className={`px-8 py-4 font-display text-xl tracking-wider transition-all ${
                               theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''
                             }`}

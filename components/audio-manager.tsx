@@ -216,6 +216,7 @@ export function AudioManager() {
   const store = useGameStore()
   const isInitialized = useRef(false)
   const lastHoveredElement = useRef<EventTarget | null>(null)
+  const wasTouched = useRef(false)
 
   // Initialization: needs to happen after a user interaction
   const initAudio = useCallback(() => {
@@ -295,6 +296,17 @@ export function AudioManager() {
   }, [store.sfxEnabled, store.sfxVolume, initAudio])
 
   useEffect(() => {
+
+    const handleTouchStart = () => {
+      wasTouched.current = true
+    }
+
+    const handleTouchEnd = () => {
+      setTimeout(() => {
+        wasTouched.current = false
+      }, 50)
+    }
+
     const handleSFXPlay = (type: 'hover' | 'select', targetElement: HTMLElement) => {
       const interactiveElement = targetElement.closest('button, a, input[type="range"], input[type="checkbox"], [role="button"], [role="menuitem"], [tabindex]:not([tabindex="-1"]), [data-sfx-interactive]') as HTMLElement | null;
       if (interactiveElement) {
@@ -312,7 +324,9 @@ export function AudioManager() {
     }
 
     const handleMouseEnter = (e: MouseEvent) => {
-      handleSFXPlay('hover', e.target as HTMLElement)
+      if (!wasTouched.current) {
+        handleSFXPlay('hover', e.target as HTMLElement)
+      }
     }
 
     const handleMouseLeave = (e: MouseEvent) => {
@@ -330,7 +344,9 @@ export function AudioManager() {
     }
 
     const handleFocusIn = (e: FocusEvent) => {
-      handleSFXPlay('hover', e.target as HTMLElement)
+      if (!wasTouched.current) {
+        handleSFXPlay('hover', e.target as HTMLElement)
+      }
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -340,6 +356,8 @@ export function AudioManager() {
     }
     
     // Add global event listeners
+    document.addEventListener('touchstart', handleTouchStart, true)
+    document.addEventListener('touchend', handleTouchEnd, true)
     document.addEventListener('mouseover', handleMouseEnter)
     document.addEventListener('mouseout', handleMouseLeave)
     document.addEventListener('click', handleClick)
@@ -348,6 +366,8 @@ export function AudioManager() {
 
     return () => {
       // Clean up event listeners
+      document.removeEventListener('touchstart', handleTouchStart, true)
+      document.removeEventListener('touchend', handleTouchEnd, true)
       document.removeEventListener('mouseover', handleMouseEnter)
       document.removeEventListener('mouseout', handleMouseLeave)
       document.removeEventListener('click', handleClick)

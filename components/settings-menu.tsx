@@ -48,17 +48,17 @@ export function SettingsMenu() {
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
-  const playSelectSfx = useCallback(() => {
+  const playSfx = useCallback((type: 'hover' | 'select') => {
     if (sfxEnabled) {
       const player = getAudioPlayerInstance()
       if (player) {
-        player.playSFX('select', sfxVolume)
+        player.playSFX(type, sfxVolume)
       }
     }
   }, [sfxEnabled, sfxVolume])
 
   const handleAction = useCallback((itemId: string, direction?: 'left' | 'right') => {
-    playSelectSfx()
+    playSfx('select')
     switch (itemId) {
       case 'theme':
         if (direction === 'left') {
@@ -92,7 +92,7 @@ export function SettingsMenu() {
         goBack()
         break
     }
-  }, [themeIndex, setTheme, musicVolume, setMusicVolume, sfxVolume, setSfxVolume, toggleCursor, goBack, playSelectSfx])
+  }, [themeIndex, setTheme, musicVolume, setMusicVolume, sfxVolume, setSfxVolume, toggleCursor, goBack, playSfx])
 
   // Keyboard navigation
   useEffect(() => {
@@ -102,14 +102,14 @@ export function SettingsMenu() {
         case 'w':
         case 'W':
           e.preventDefault()
-          playSelectSfx()
+          playSfx('hover')
           setSelectedIndex((prev) => (prev - 1 + settingItems.length) % settingItems.length)
           break
         case 'ArrowDown':
         case 's':
         case 'S':
           e.preventDefault()
-          playSelectSfx()
+          playSfx('hover')
           setSelectedIndex((prev) => (prev + 1) % settingItems.length)
           break
         case 'ArrowLeft':
@@ -127,24 +127,24 @@ export function SettingsMenu() {
         case 'Enter':
         case ' ':
           e.preventDefault()
-          playSelectSfx()
           if (settingItems[selectedIndex].id === 'back') {
             goBack()
+            playSfx('select')
           } else if (settingItems[selectedIndex].type === 'toggle') {
             handleAction(settingItems[selectedIndex].id)
           }
           break
         case 'Escape':
           e.preventDefault()
-          playSelectSfx()
           goBack()
+          playSfx('select')
           break
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedIndex, handleAction, goBack, playSelectSfx])
+  }, [selectedIndex, handleAction, goBack, playSfx])
 
   return (
     <motion.div
@@ -283,7 +283,7 @@ export function SettingsMenu() {
                           step={10}
                           onValueChange={(value) => {
                             setMusicVolume(value[0])
-                            playSelectSfx()
+                            playSfx('select')
                           }}
                           className="w-32 sm:w-48 md:w-64"
                           style={{ 
@@ -323,7 +323,7 @@ export function SettingsMenu() {
                           step={10}
                           onValueChange={(value) => {
                             setSfxVolume(value[0])
-                            playSelectSfx()
+                            playSfx('select')
                           }}
                           className="w-32 sm:w-48 md:w-64"
                           style={{ 
@@ -353,7 +353,7 @@ export function SettingsMenu() {
                         checked={cursorEnabled}
                         onCheckedChange={() => {
                           toggleCursor()
-                          playSelectSfx()
+                          playSfx('select')
                         }}
                         style={{
                           backgroundColor: cursorEnabled ? accent : 'var(--secondary)'
@@ -365,7 +365,7 @@ export function SettingsMenu() {
                       <button
                         onClick={() => {
                           goBack()
-                          playSelectSfx()
+                          playSfx('select')
                         }}
                         className="font-display text-base sm:text-xl tracking-wider px-4 sm:px-6 py-1 sm:py-2 border-2 hover:bg-accent/20 transition-colors"
                         style={{ borderColor: accent, color: accent }}

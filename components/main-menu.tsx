@@ -14,6 +14,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
+import { getAudioPlayerInstance } from '@/components/audio-manager'
+
 const menuItems = [
   { id: 'start', label: 'START', sublabel: 'Enter Portfolio' },
   { id: 'settings', label: 'SETTINGS', sublabel: 'Customize Experience' },
@@ -24,14 +26,25 @@ export function MainMenu() {
   const theme = useGameStore((state) => state.theme)
   const startGame = useGameStore((state) => state.startGame)
   const setScreen = useGameStore((state) => state.setScreen)
+  const sfxEnabled = useGameStore((state) => state.sfxEnabled)
+  const sfxVolume = useGameStore((state) => state.sfxVolume)
   
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [showQuitDialog, setShowQuitDialog] = useState(false)
   const [quitDialogIndex, setQuitDialogIndex] = useState(0)
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
+  
+  const playSfx = useCallback((type: 'hover' | 'select') => {
+    if (!sfxEnabled) return
+    const player = getAudioPlayerInstance()
+    if (player) {
+      player.playSFX(type, sfxVolume)
+    }
+  }, [sfxEnabled, sfxVolume])
 
   const handleSelect = useCallback((id: string) => {
+    playSfx('select')
     switch (id) {
       case 'start':
         startGame()
@@ -44,9 +57,10 @@ export function MainMenu() {
         setQuitDialogIndex(0) // Default to NO
         break
     }
-  }, [startGame, setScreen])
+  }, [startGame, setScreen, playSfx])
 
   const handleQuit = (confirmed: boolean) => {
+    playSfx('select')
     setShowQuitDialog(false)
     if (!confirmed) return
 
@@ -70,6 +84,7 @@ export function MainMenu() {
           case 'd':
           case 'D':
             e.preventDefault()
+            playSfx('hover')
             setQuitDialogIndex((prev) => (prev === 0 ? 1 : 0))
             break
           case 'Enter':
@@ -80,6 +95,7 @@ export function MainMenu() {
             break
           case 'Escape':
             e.preventDefault()
+            playSfx('select')
             setShowQuitDialog(false)
             break
         }
@@ -91,12 +107,14 @@ export function MainMenu() {
         case 'w':
         case 'W':
           e.preventDefault()
+          playSfx('hover')
           setSelectedIndex((prev) => (prev - 1 + menuItems.length) % menuItems.length)
           break
         case 'ArrowDown':
         case 's':
         case 'S':
           e.preventDefault()
+          playSfx('hover')
           setSelectedIndex((prev) => (prev + 1) % menuItems.length)
           break
         case 'Enter':
@@ -109,7 +127,7 @@ export function MainMenu() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedIndex, showQuitDialog, quitDialogIndex, handleSelect])
+  }, [selectedIndex, showQuitDialog, quitDialogIndex, handleSelect, playSfx])
 
   return (
     <motion.div

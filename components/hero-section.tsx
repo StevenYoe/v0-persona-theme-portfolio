@@ -97,7 +97,7 @@ export function HeroSection() {
   return (
     <section 
       ref={containerRef}
-      className="relative h-[250vh] overflow-hidden"
+      className="relative h-[100vh] overflow-hidden"
     >
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
         

@@ -39,25 +39,24 @@ export function PauseMenu() {
 
   const currentItems = activeTab === 'menu' ? menuItems : navItems
 
-  const playSelectSfx = useCallback(() => {
-    if (sfxEnabled) {
-      const player = getAudioPlayerInstance()
-      if (player) {
-        player.playSFX('select', sfxVolume)
-      }
+  const playSfx = useCallback((type: 'hover' | 'select') => {
+    if (!sfxEnabled) return
+    const player = getAudioPlayerInstance()
+    if (player) {
+      player.playSFX(type, sfxVolume)
     }
   }, [sfxEnabled, sfxVolume])
 
   const handleConfirmMainMenu = useCallback((confirmed: boolean) => {
-    playSelectSfx()
+    playSfx('select')
     setShowConfirmDialog(false)
     if (confirmed) {
       returnToMainMenu()
     }
-  }, [returnToMainMenu, playSelectSfx])
+  }, [returnToMainMenu, playSfx])
 
   const handleSelect = useCallback((id: string) => {
-    playSelectSfx()
+    playSfx('select')
     if (activeTab === 'menu') {
       switch (id) {
         case 'resume':
@@ -81,7 +80,7 @@ export function PauseMenu() {
         }, 300)
       }
     }
-  }, [activeTab, closePauseMenu, setScreen, playSelectSfx])
+  }, [activeTab, closePauseMenu, setScreen, playSfx])
 
   // Reset selection when tab changes
   useEffect(() => {
@@ -98,7 +97,7 @@ export function PauseMenu() {
         switch (e.key) {
           case 'Escape':
             e.preventDefault()
-            playSelectSfx()
+            playSfx('select')
             setShowConfirmDialog(false)
             break
           case 'ArrowLeft':
@@ -108,7 +107,7 @@ export function PauseMenu() {
           case 'd':
           case 'D':
             e.preventDefault()
-            playSelectSfx()
+            playSfx('hover')
             setConfirmSelectedIndex((prev) => (prev === 0 ? 1 : 0))
             break
           case 'Enter':
@@ -124,35 +123,35 @@ export function PauseMenu() {
       switch (e.key) {
         case 'Escape':
           e.preventDefault()
-          playSelectSfx()
+          playSfx('select')
           closePauseMenu()
           break
         case 'ArrowUp':
         case 'w':
         case 'W':
           e.preventDefault()
-          playSelectSfx()
+          playSfx('hover')
           setSelectedIndex((prev) => (prev - 1 + currentItems.length) % currentItems.length)
           break
         case 'ArrowDown':
         case 's':
         case 'S':
           e.preventDefault()
-          playSelectSfx()
+          playSfx('hover')
           setSelectedIndex((prev) => (prev + 1) % currentItems.length)
           break
         case 'ArrowLeft':
         case 'a':
         case 'A':
           e.preventDefault()
-          playSelectSfx()
+          playSfx('select')
           setActiveTab('menu')
           break
         case 'ArrowRight':
         case 'd':
         case 'D':
           e.preventDefault()
-          playSelectSfx()
+          playSfx('select')
           setActiveTab('navigation')
           break
         case 'Enter':
@@ -165,7 +164,7 @@ export function PauseMenu() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isVisible, selectedIndex, closePauseMenu, handleSelect, currentItems, showConfirmDialog, confirmSelectedIndex, handleConfirmMainMenu, playSelectSfx])
+  }, [isVisible, selectedIndex, closePauseMenu, handleSelect, currentItems, showConfirmDialog, confirmSelectedIndex, handleConfirmMainMenu, playSfx])
 
   return (
     <AnimatePresence>

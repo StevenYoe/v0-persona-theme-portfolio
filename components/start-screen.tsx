@@ -24,7 +24,6 @@ export function StartScreen() {
 
   useEffect(() => {
     const handleInteraction = () => {
-      playSelectSfx();
       setScreen('main-menu');
     };
 
@@ -35,7 +34,7 @@ export function StartScreen() {
       window.removeEventListener('keydown', handleInteraction);
       window.removeEventListener('click', handleInteraction);
     };
-  }, [setScreen, playSelectSfx]);
+  }, [setScreen]);
 
   return (
     <motion.div

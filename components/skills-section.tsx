@@ -4,54 +4,11 @@ import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'fra
 import { useRef, useState, useEffect } from 'react'
 import { useGameStore } from '@/lib/store'
 import { ParallaxSection, FloatingElement } from './parallax-section'
-
-const skills = [
-  { 
-    name: 'Quality Assurance', 
-    icon: '✅',
-    description: 'Experienced in manual testing (Jira, test scenarios) and self-taught in automated testing using Selenium for web and Appium for mobile (Android).',
-    category: 'Testing'
-  },
-  { 
-    name: 'Backend Development', 
-    icon: '⚙️',
-    description: 'Expertise in Laravel, Node.js, and Next.js for robust server-side logic and API development.',
-    category: 'Development'
-  },
-  { 
-    name: 'Database Management', 
-    icon: '🗄️',
-    description: 'Proficient in MySQL, MongoDB, PostgreSQL, and Redis for scalable data solutions.',
-    category: 'Data'
-  },
-  { 
-    name: 'Programming Languages', 
-    icon: '💻',
-    description: 'Skilled in PHP, Python, C, C++, JavaScript, and C# for diverse development needs.',
-    category: 'Language'
-  },
-  { 
-    name: 'Frontend Development', 
-    icon: '🌐',
-    description: 'Experienced with ReactJS, Next.js, and jQuery for dynamic and responsive user interfaces.',
-    category: 'Development'
-  },
-  {
-    name: 'Data Analysis',
-    icon: '📊',
-    description: 'Competent in Google Colab, R Studio, Tableau, and Power BI for insightful data interpretation.',
-    category: 'Data'
-  },
-]
-
-const tools = [
-  'DBeaver', 'Postman', 'GitHub', 'VS Code', 'Canva', 'Figma',
-  'Google Colab', 'R Studio', 'Tableau', 'Power BI', 'Vmix', 'OBS', 'Odoo',
-  'Word', 'Excel', 'PowerPoint'
-]
+import { getFieldContent } from '@/lib/portfolio-data'
 
 export function SkillsSection() {
   const theme = useGameStore((state) => state.theme)
+  const { skills, tools } = getFieldContent(useGameStore((state) => state.field))
   const containerRef = useRef<HTMLDivElement>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState(0)
@@ -245,7 +202,7 @@ export function SkillsSection() {
                 viewport={{ once: true }}
               />
               <span className="text-sm tracking-[0.3em]" style={{ color: accent }}>
-                02 / SKILLS
+                / SKILLS
               </span>
             </div>
             

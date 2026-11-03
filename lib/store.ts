@@ -1,14 +1,18 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { FieldId } from '@/lib/portfolio-data'
 
 export type PersonaTheme = 'persona-3' | 'persona-4' | 'persona-5'
-export type GameScreen = 'start-screen' | 'main-menu' | 'portfolio' | 'settings' | 'pause-menu'
+export type GameScreen = 'start-screen' | 'main-menu' | 'field-select' | 'portfolio' | 'settings' | 'pause-menu'
 export type MusicLocation = 'menu' | 'portfolio'
 
 interface GameState {
   // Screen management
   currentScreen: GameScreen
   previousScreen: GameScreen | null
+  
+  // Selected portfolio field (not persisted, asked again on every Start)
+  field: FieldId | null
   
   // Theme settings
   theme: PersonaTheme
@@ -37,6 +41,7 @@ interface GameState {
   openPauseMenu: () => void
   closePauseMenu: () => void
   startGame: () => void
+  selectField: (field: FieldId) => void
   returnToMainMenu: () => void
   setMusicLocation: (location: MusicLocation) => void
 }
@@ -47,6 +52,7 @@ export const useGameStore = create<GameState>()(
       // Initial state
       currentScreen: 'start-screen',
       previousScreen: null,
+      field: null,
       theme: 'persona-3',
       musicVolume: 80,
       sfxVolume: 80,
@@ -93,9 +99,16 @@ export const useGameStore = create<GameState>()(
         }
       },
       
-      startGame: () => set({ 
+      // START now opens the field picker first
+      startGame: () => set((state) => ({
+        previousScreen: state.currentScreen,
+        currentScreen: 'field-select'
+      })),
+
+      selectField: (field) => set({
+        field,
         currentScreen: 'portfolio',
-        previousScreen: 'main-menu',
+        previousScreen: 'field-select',
         musicLocation: 'portfolio'
       }),
       

@@ -3,10 +3,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/lib/store'
+import { getFieldContent } from '@/lib/portfolio-data'
 import { getAudioPlayerInstance } from '@/components/audio-manager'
 import { LenisProvider } from '@/components/lenis-provider'
 import { StartScreen } from '@/components/start-screen'
 import { MainMenu } from '@/components/main-menu'
+import { FieldSelect } from '@/components/field-select'
 import { SettingsMenu } from '@/components/settings-menu'
 import { PauseMenu } from '@/components/pause-menu'
 import { Navigation } from '@/components/navigation'
@@ -21,9 +23,18 @@ import { TransitionWrapper } from '@/components/transition-wrapper'
 import { AudioManager } from '@/components/audio-manager'
 import PreLoader from '@/components/pre-loader';
 
+const SECTION_COMPONENTS = {
+  about: AboutSection,
+  skills: SkillsSection,
+  experience: ExperienceSection,
+  projects: ProjectsSection,
+  contact: ContactSection,
+}
+
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
-  const { currentScreen, openPauseMenu, theme, setScreen, sfxEnabled, sfxVolume } = useGameStore()
+  const { currentScreen, openPauseMenu, theme, setScreen, sfxEnabled, sfxVolume, field } = useGameStore()
+  const content = getFieldContent(field)
 
   // Apply theme on mount and changes
   useEffect(() => {
@@ -73,6 +84,11 @@ export default function Home() {
           <MainMenu key="main-menu" />
         )}
 
+        {/* Field Select */}
+        {currentScreen === 'field-select' && (
+          <FieldSelect key="field-select" />
+        )}
+
         {/* Settings Menu */}
         {currentScreen === 'settings' && (
           <SettingsMenu key="settings" />
@@ -80,7 +96,7 @@ export default function Home() {
 
         {/* Portfolio (Main Content) */}
         {(currentScreen === 'portfolio' || currentScreen === 'pause-menu') && (
-          <main key="portfolio" className="relative">
+          <main key={`portfolio-${field ?? 'default'}`} className="relative">
             <Navigation />
             
             <TransitionWrapper>
@@ -88,25 +104,14 @@ export default function Home() {
                 <HeroSection />
               </div>
               
-              <div id="about">
-                <AboutSection />
-              </div>
-              
-              <div id="skills">
-                <SkillsSection />
-              </div>
-              
-              <div id="experience">
-                <ExperienceSection />
-              </div>
-              
-              <div id="projects">
-                <ProjectsSection />
-              </div>
-              
-              <div id="contact">
-                <ContactSection />
-              </div>
+              {content.sections.map((id) => {
+                const Section = SECTION_COMPONENTS[id]
+                return (
+                  <div id={id} key={id}>
+                    <Section />
+                  </div>
+                )
+              })}
             </TransitionWrapper>
           </main>
         )}

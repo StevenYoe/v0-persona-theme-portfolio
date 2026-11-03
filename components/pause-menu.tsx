@@ -4,9 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useGameStore } from '@/lib/store'
 import { getAudioPlayerInstance } from '@/components/audio-manager'
+import { getFieldContent, type SectionId } from '@/lib/portfolio-data'
 
 const menuItems = [
   { id: 'resume', label: 'RESUME', sublabel: 'Continue Viewing' },
+  { id: 'field', label: 'CHANGE FIELD', sublabel: 'Switch Portfolio Focus' },
   { id: 'settings', label: 'SETTINGS', sublabel: 'Customize Experience' },
   { id: 'main-menu', label: 'MAIN MENU', sublabel: 'Return to Title' },
 ]
@@ -38,7 +40,12 @@ export function PauseMenu() {
   const isVisible = currentScreen === 'pause-menu'
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
-  const currentItems = activeTab === 'menu' ? menuItems : navItems
+  const field = useGameStore((state) => state.field)
+  const { sections } = getFieldContent(field)
+  const visibleNavItems = navItems.filter(
+    (item) => item.id === 'hero' || sections.includes(item.id as SectionId)
+  )
+  const currentItems = activeTab === 'menu' ? menuItems : visibleNavItems
 
   const playSfx = useCallback((type: 'hover' | 'select') => {
     if (!sfxEnabled) return
@@ -62,6 +69,9 @@ export function PauseMenu() {
       switch (id) {
         case 'resume':
           closePauseMenu()
+          break
+        case 'field':
+          setScreen('field-select')
           break
         case 'settings':
           setScreen('settings')
@@ -288,7 +298,7 @@ export function PauseMenu() {
                   data-sfx-interactive
                   onClick={() => {
                     setActiveTab(tab.id as 'menu' | 'navigation')
-                    playSelectSfx()
+                    playSfx('select')
                   }}
                   className={`px-6 py-3 font-display text-lg tracking-wider transition-all ${
                     theme === 'persona-5' ? '-skew-x-3' : theme === 'persona-3' ? 'rounded-lg' : ''
@@ -435,7 +445,7 @@ export function PauseMenu() {
                   className="absolute inset-0 bg-background"
                   onClick={() => {
                     setShowConfirmDialog(false)
-                    playSelectSfx()
+                    playSfx('select')
                   }}
                 />
 

@@ -1,25 +1,16 @@
 "use client"
 
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useGameStore } from '@/lib/store'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 
 import { getAudioPlayerInstance } from '@/components/audio-manager'
+import { CreditsModal } from '@/components/credits-modal'
 
 const menuItems = [
   { id: 'start', label: 'START', sublabel: 'Enter Portfolio' },
   { id: 'settings', label: 'SETTINGS', sublabel: 'Customize Experience' },
-  { id: 'quit', label: 'QUIT', sublabel: 'Exit Application' },
+  { id: 'credits', label: 'CREDITS', sublabel: 'Built With & Thanks' },
 ]
 
 export function MainMenu() {
@@ -30,8 +21,7 @@ export function MainMenu() {
   const sfxVolume = useGameStore((state) => state.sfxVolume)
   
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [showQuitDialog, setShowQuitDialog] = useState(false)
-  const [quitDialogIndex, setQuitDialogIndex] = useState(0)
+  const [showCredits, setShowCredits] = useState(false)
   const wasTouched = useRef(false)
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
@@ -53,25 +43,11 @@ export function MainMenu() {
       case 'settings':
         setScreen('settings')
         break
-      case 'quit':
-        setShowQuitDialog(true)
-        setQuitDialogIndex(0) // Default to NO
+      case 'credits':
+        setShowCredits(true)
         break
     }
   }, [startGame, setScreen, playSfx])
-
-  const handleQuit = (confirmed: boolean) => {
-    playSfx('select')
-    setShowQuitDialog(false)
-    if (!confirmed) return
-
-    // Try to close the tab/window
-    window.close()
-    // If that doesn't work (most browsers block this), show a message
-    setTimeout(() => {
-      alert('Please close this tab manually.')
-    }, 100)
-  }
 
   // Keyboard navigation
   useEffect(() => {
@@ -85,32 +61,7 @@ export function MainMenu() {
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (showQuitDialog) {
-        switch (e.key) {
-          case 'ArrowLeft':
-          case 'a':
-          case 'A':
-          case 'ArrowRight':
-          case 'd':
-          case 'D':
-            e.preventDefault()
-            playSfx('hover')
-            setQuitDialogIndex((prev) => (prev === 0 ? 1 : 0))
-            break
-          case 'Enter':
-          case ' ':
-            e.preventDefault()
-            // 0 is NO, 1 is YES
-            handleQuit(quitDialogIndex === 1)
-            break
-          case 'Escape':
-            e.preventDefault()
-            playSfx('select')
-            setShowQuitDialog(false)
-            break
-        }
-        return
-      }
+      if (showCredits) return
       
       switch (e.key) {
         case 'ArrowUp':
@@ -143,7 +94,7 @@ export function MainMenu() {
       window.removeEventListener('touchstart', handleTouchStart)
       window.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [selectedIndex, showQuitDialog, quitDialogIndex, handleSelect, playSfx])
+  }, [selectedIndex, showCredits, handleSelect, playSfx])
 
   return (
     <motion.div
@@ -457,53 +408,7 @@ export function MainMenu() {
         </motion.div>
       </div>
 
-      {/* Quit Dialog */}
-      <AlertDialog open={showQuitDialog} onOpenChange={setShowQuitDialog}>
-        <AlertDialogContent 
-          className="border-2"
-          style={{ 
-            backgroundColor: 'var(--background)',
-            borderColor: accent
-          }}
-        >
-          <AlertDialogHeader>
-            <AlertDialogTitle 
-              className="font-display text-2xl sm:text-3xl tracking-wider"
-              style={{ color: accent }}
-            >
-              QUIT APPLICATION?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground text-sm sm:text-base">
-              Are you sure you want to exit? Your progress will not be saved.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-4">
-            {['NO', 'YES'].map((option, i) => {
-              const isSelected = quitDialogIndex === i
-              return (
-                <motion.button
-                  key={option}
-                  data-sfx-interactive
-                  onClick={() => handleQuit(option === 'YES')}
-                  onMouseEnter={() => setQuitDialogIndex(i)}
-                  className={`w-full font-display text-base sm:text-xl tracking-wider border-2 px-6 sm:px-8 transition-colors ${
-                    option === 'NO' ? '' : ''
-                  }`}
-                  style={{
-                    borderColor: accent,
-                    backgroundColor: isSelected ? accent : 'transparent',
-                    color: isSelected ? 'var(--background)' : accent,
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {option}
-                </motion.button>
-              )
-            })}
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CreditsModal open={showCredits} onClose={() => setShowCredits(false)} />
     </motion.div>
   )
 }

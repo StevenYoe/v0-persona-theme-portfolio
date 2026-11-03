@@ -4,161 +4,9 @@ import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'fra
 import { useRef, useState } from 'react'
 import { useGameStore } from '@/lib/store'
 import { ParallaxSection, FloatingElement } from './parallax-section'
+import { getFieldContent } from '@/lib/portfolio-data'
 
 type ExperienceTab = 'work' | 'organization' | 'education'
-
-const workExperience = [
-  {
-    id: 1,
-    role: 'Product Operation Intern – Quality Assurance',
-    company: 'PT Global Loyalty Indonesia',
-    period: 'August 2025 – January 2026',
-    description: 'Focused on ensuring seamless user experiences and validating functional requirements within high-traffic mobile applications as a Product Operation Intern – Quality Assurance.',
-    highlights: [
-      'Executed Manual Testing for Alfagift mobile app',
-      'Developed comprehensive Test Scenarios & Cases',
-      'Reported defects using Jira for timely resolution',
-      'Authored User Guides for new features',
-      'Utilized Postman, DBeaver, MongoDB, Redis for data validation'
-    ]
-  },
-  {
-    id: 2,
-    role: 'IT Internship',
-    company: 'PT Pristine Prima Lestari',
-    period: 'March - July 2025',
-    description: 'Managed full-stack web development, covering the entire SDLC, and provided essential technical support for company operations as an IT Intern.',
-    highlights: [
-      'Developed a full-stack company website & job portal',
-      'Managed SDLC from frontend to backend & database',
-      'Provided technical infrastructure support'
-    ]
-  },
-  {
-    id: 3,
-    role: 'Web Development Internship',
-    company: 'PT Samanasoft Inovasi Persada',
-    period: 'June - July 2024',
-    description: 'Contributed to web development projects by developing features for existing websites and programs, and creating tutorial videos.',
-    highlights: [
-      'Developed features for existing websites/programs',
-      'Contributed to tutorial video creation'
-    ]
-  },
-]
-
-const organizationExperience = [
-  {
-    id: 1,
-    role: 'Equipment & Logistics Division',
-    company: 'Outbound WMK FB UMN 2024 (Digital Entrepreneurship Event)',
-    period: 'November 2024',
-    description: 'Managed equipment and logistics for the digital entrepreneurship event.',
-    highlights: [
-      'Managed equipment and logistics'
-    ]
-  },
-  {
-    id: 2,
-    role: 'Treasurer & Head of Multimedia Division',
-    company: 'Inaugurasi 2024 (Senate Session Welcoming New Students)',
-    period: 'January - August 2024',
-    description: 'Managed financial resources and multimedia aspects for the new student orientation event \'Inaugurasi 2024\'.',
-    highlights: [
-      'Managed budget allocation',
-      'Led multimedia content creation'
-    ]
-  },
-  {
-    id: 3,
-    role: 'Secretary & Treasurer',
-    company: 'Anagata 2024 (New Student Orientation)',
-    period: 'January - August 2024',
-    description: 'Served in key leadership roles for the new student orientation event \'Anagata 2024\', focusing on finance and administration.',
-    highlights: [
-      'Coordinated administrative tasks',
-      'Managed financial records & budgets'
-    ]
-  },
-  {
-    id: 4,
-    role: 'Treasurer',
-    company: 'ECLIVAL 2024 (E-Commerce Logistics Student Association Festival)',
-    period: 'January - August 2024',
-    description: 'Handled financial management for ECLIVAL 2024, a large-scale festival organized by the E-Commerce Logistics Student Association.',
-    highlights: [
-      'Oversaw financial transactions & reporting',
-      'Ensured fiscal responsibility'
-    ]
-  },
-  {
-    id: 5,
-    role: 'Treasurer',
-    company: 'E-Commerce Logistics Student Association',
-    period: 'January 2023 - June 2024',
-    description: 'Managed the financial affairs of the E-Commerce Logistics Student Association.',
-    highlights: [
-      'Responsible for financial planning & oversight',
-      'Maintained accurate financial records'
-    ]
-  },
-  {
-    id: 6,
-    role: 'Head of Fresh Money Division',
-    company: 'Ashandya 2023 (Cultural Events)',
-    period: 'July - December 2023',
-    description: 'Led fundraising initiatives for the cultural event \'Ashandya 2023\'.',
-    highlights: [
-      'Led fundraising initiatives'
-    ]
-  },
-  {
-    id: 7,
-    role: 'Event Division',
-    company: 'Anagata 2023 (New Student Orientation)',
-    period: 'January - August 2023',
-    description: 'Contributed to the event organization team for Anagata 2023.',
-    highlights: [
-      'Assisted in event planning and execution'
-    ]
-  },
-  {
-    id: 8,
-    role: 'Committee',
-    company: 'MNP Campus Visit Committee 2023',
-    period: 'January, June, & August 2023',
-    description: 'Served as a committee member for the MNP Campus Visit.',
-    highlights: [
-      'Contributed to campus visit organization'
-    ]
-  },
-]
-
-const education = [
-  {
-    id: 1,
-    role: 'E-Commerce Logistics Major',
-    company: 'Multimedia Nusantara Polytechnic',
-    period: '2022 - Present',
-    description: 'Currently pursuing a degree with a strong academic record, maintaining a high GPA and recognized as a scholarship recipient.',
-    highlights: [
-      'GPA: 3.84/4.0',
-      'Scholarship recipient'
-    ]
-  },
-  {
-    id: 2,
-    role: 'Certifications & Achievements',
-    company: 'Various Platforms',
-    period: '2023 - 2024',
-    description: 'Participated in various online courses and training sessions to enhance technical skills and professional knowledge.',
-    highlights: [
-      'Samsung Innovation Campus Batch 5',
-      'DQ Lab Data Analysis and Visualization',
-      'Disaster Preparedness & Post-Disaster Resilience'
-    ]
-  },
-]
 
 const tabs: { id: ExperienceTab; label: string; sublabel: string }[] = [
   { id: 'work', label: 'WORK', sublabel: 'Professional Experience' },
@@ -168,6 +16,7 @@ const tabs: { id: ExperienceTab; label: string; sublabel: string }[] = [
 
 export function ExperienceSection() {
   const theme = useGameStore((state) => state.theme)
+  const { experience } = getFieldContent(useGameStore((state) => state.field))
   const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeTab, setActiveTab] = useState<ExperienceTab>('work')
@@ -187,9 +36,9 @@ export function ExperienceSection() {
 
   const getExperienceData = () => {
     switch (activeTab) {
-      case 'work': return workExperience
-      case 'organization': return organizationExperience
-      case 'education': return education
+      case 'work': return experience.work
+      case 'organization': return experience.organization
+      case 'education': return experience.education
     }
   }
 
@@ -285,7 +134,7 @@ export function ExperienceSection() {
                 viewport={{ once: true }}
               />
               <span className="text-sm tracking-[0.3em]" style={{ color: accent }}>
-                03 / EXPERIENCE
+                / EXPERIENCE
               </span>
             </div>
             

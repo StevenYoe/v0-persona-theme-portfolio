@@ -12,18 +12,23 @@ const socialLinks = [
   { name: 'WEBSITE', url: 'https://stevenyoe.is-a.dev', icon: 'WS' },
 ]
 
+const WHATSAPP_NUMBER = '6285183088865'
+
 const contactMethods = [
   { 
     label: 'EMAIL ME', 
     value: 'stevenyoe80@gmail.com', 
     href: 'mailto:stevenyoe80@gmail.com',
-    description: 'For business inquiries'
+    description: 'For business inquiries',
+    kind: 'email'
   },
   { 
     label: 'CHAT ON WHATSAPP', 
     value: '+62 851 8308 8865', 
-    href: 'https://wa.me/6285183088865',
-    description: 'Fast response, available 24/7'
+    // wa.me lets WhatsApp pick the app or WhatsApp Web, depending on what the visitor uses.
+    href: `https://wa.me/${WHATSAPP_NUMBER}`,
+    description: 'Fast response, available 24/7',
+    kind: 'whatsapp'
   },
 ]
 
@@ -179,7 +184,7 @@ export function ContactSection() {
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-px" style={{ backgroundColor: accent }} />
             <span className="text-sm tracking-[0.3em]" style={{ color: accent }}>
-              05 / CONTACT
+              / CONTACT
             </span>
           </div>
         </motion.div>
@@ -244,6 +249,9 @@ export function ContactSection() {
               <motion.a
                 key={method.label}
                 href={method.href}
+                {...(method.kind === 'whatsapp'
+                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                  : {})}
                 initial={{ opacity: 0, x: 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}

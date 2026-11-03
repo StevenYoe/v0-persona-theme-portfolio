@@ -4,10 +4,12 @@ import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'fram
 import { useRef, useEffect, useState } from 'react'
 import { useGameStore } from '@/lib/store'
 import { FloatingElement, MouseParallax } from './parallax-section'
+import { getFieldContent } from '@/lib/portfolio-data'
 
 export function HeroSection() {
   const theme = useGameStore((state) => state.theme)
   const parallaxIntensity = useGameStore((state) => state.parallaxIntensity)
+  const field = getFieldContent(useGameStore((state) => state.field))
   const containerRef = useRef<HTMLDivElement>(null)
   
   // Mouse position for interactive parallax
@@ -393,7 +395,7 @@ export function HeroSection() {
             className="mt-16"
           >
             <p className="text-sm tracking-[0.4em] text-muted-foreground mb-3">
-              BACKEND & QA SPECIALIST
+              {field.heroTitle}
             </p>
             <h2 
               className="font-display text-5xl md:text-7xl tracking-wider"

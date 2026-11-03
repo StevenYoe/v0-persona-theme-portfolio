@@ -183,7 +183,17 @@ class AudioPlayer {
     this.changeTrack()
   }
 
+  // Last play time per SFX type. The same click can reach both a component handler
+  // and the global document listener, so identical sounds within this window are skipped.
+  private lastSfxAt: Record<string, number> = {}
+  private static readonly SFX_DEDUPE_MS = 80
+
   playSFX(sfxType: 'hover' | 'select', volume: number) {
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now()
+    const last = this.lastSfxAt[sfxType] ?? -Infinity
+    if (now - last < AudioPlayer.SFX_DEDUPE_MS) return
+    this.lastSfxAt[sfxType] = now
+
     const path = getAudioPath(this.theme, `${sfxType}.mp3`)
     const sfx = new Audio(path) // Create new instance to allow overlaps
     sfx.volume = volume / 100

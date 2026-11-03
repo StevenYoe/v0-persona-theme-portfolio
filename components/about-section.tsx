@@ -5,10 +5,12 @@ import { useRef, useState, useCallback } from 'react' // Added useCallback
 import Image from 'next/image'
 import { useGameStore } from '@/lib/store'
 import { ParallaxSection, FloatingElement } from './parallax-section'
+import { getFieldContent } from '@/lib/portfolio-data'
 import { getAudioPlayerInstance } from '@/components/audio-manager' // Added import for audio manager
 
 export function AboutSection() {
   const theme = useGameStore((state) => state.theme)
+  const content = getFieldContent(useGameStore((state) => state.field))
   const containerRef = useRef<HTMLDivElement>(null)
   const [isImageError, setIsImageError] = useState(false)
   const sfxEnabled = useGameStore((state) => state.sfxEnabled) // Get sfxEnabled state
@@ -34,12 +36,7 @@ export function AboutSection() {
 
   const accent = theme === 'persona-3' ? '#00d4ff' : theme === 'persona-4' ? '#ffd700' : '#e60012'
 
-  const stats = [
-    { number: '3', label: 'Internship Experience' },
-    { number: '5+', label: 'Web Projects' },
-    { number: '3+', label: 'Happy Clients' },
-    { number: '100%', label: 'Dedication' },
-  ]
+  const stats = content.stats
 
   const playSelectSfx = useCallback(() => {
     if (sfxEnabled) {
@@ -53,8 +50,8 @@ export function AboutSection() {
   const handleDownloadCV = () => {
     playSelectSfx() // Play SFX on download
     const link = document.createElement('a')
-    link.href = '/CV_Steven.pdf' // Corrected path
-    link.download = 'CV_Steven.pdf' // Corrected filename
+    link.href = content.cv.file
+    link.download = content.cv.downloadName
     link.click()
   }
 
@@ -241,7 +238,7 @@ export function AboutSection() {
                   className="font-display text-2xl tracking-wider"
                   style={{ color: theme === 'persona-5' ? '#fff' : 'var(--background)' }}
                 >
-                  CREATIVE
+                  {content.about.badge}
                 </span>
               </motion.div>
             </div>
@@ -266,7 +263,7 @@ export function AboutSection() {
                   transition={{ duration: 0.6 }}
                 />
                 <span className="text-sm tracking-[0.3em]" style={{ color: accent }}>
-                  01 / ABOUT
+                  / ABOUT
                 </span>
               </motion.div>
 
@@ -287,7 +284,7 @@ export function AboutSection() {
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
                 >
-                  CRAFTING
+                  {content.about.headingTop}
                 </motion.span>
                 <br />
                 <motion.span 
@@ -297,7 +294,7 @@ export function AboutSection() {
                   viewport={{ once: true }}
                   transition={{ delay: 0.3 }}
                 >
-                  DIGITAL EXPERIENCES
+                  {content.about.headingBottom}
                 </motion.span>
               </motion.h2>
 
@@ -309,12 +306,9 @@ export function AboutSection() {
                 transition={{ delay: 0.4 }}
                 className="space-y-4 text-muted-foreground text-lg leading-relaxed"
               >
-                <p>
-                  As a highly analytical E-Commerce Logistics student, I specialize in Backend Development and Quality Assurance. My passion lies in building robust server-side logic and ensuring software excellence.
-                </p>
-                <p>
-                  With a proven track record in manual testing for high-traffic mobile applications (Alfagift) and designing comprehensive database architectures, I am a self-driven learner proficient in SQL/NoSQL databases, with a growing focus on Automation Testing and system optimization.
-                </p>
+                {content.about.paragraphs.map((text, i) => (
+                  <p key={i}>{text}</p>
+                ))}
               </motion.div>
 
               {/* Download CV Button */}

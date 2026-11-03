@@ -4,67 +4,15 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useGameStore } from '@/lib/store'
-
-const projects = [
-  {
-    id: 1,
-    title: 'Persona Theme Portfolio',
-    category: 'Frontend Development',
-    description: 'An interactive and animated portfolio website inspired by the Persona game series UI/UX.',
-    fullDescription: 'This portfolio is a personal project designed to showcase my frontend development skills. It is built with Next.js and heavily utilizes Framer Motion for complex animations and page transitions, creating a dynamic and engaging user experience reminiscent of the Persona game series. The entire interface, from the custom cursor to the themed menus, is designed to be interactive and visually cohesive.',
-    tags: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
-    year: '2026',
-    features: [
-      'Game-inspired UI/UX',
-      'Complex animations & transitions',
-      'Theme-switching functionality',
-      'Interactive custom components'
-    ],
-    image: '/images/portfolio.webp',
-    link: 'https://stevenyoe.is-a.dev/'
-  },
-  {
-    id: 2,
-    title: 'Pazar Brand & Company Website',
-    category: 'Full-stack Development',
-    description: 'Independently developed a complete company website with responsive design and robust backend system.',
-    fullDescription: 'As a Full-stack Developer, I independently designed and developed a comprehensive company website with a responsive user interface. I built a robust backend system integrated with a solid database architecture, significantly enhancing the company\'s digital presence through modern web technologies.',
-    tags: ['Laravel', 'PHP', 'Tailwind CSS', 'MySQL'],
-    year: '2025',
-    features: [
-      'Complete responsive company website',
-      'Robust backend system',
-      'Comprehensive database architecture',
-      'Enhanced digital presence'
-    ],
-    image: '/images/pazar.webp',
-    link: 'https://bumbupazar.com/'
-  },
-  {
-    id: 3,
-    title: 'Rese Corner\'s Website',
-    category: 'Project Management & Backend Development',
-    description: 'Managed communication between development teams and developed backend systems.',
-    fullDescription: 'In this role, I served as both Project Manager and Programmer, overseeing the communication between backend and frontend development teams. My primary focus was on developing robust backend systems, and I also contributed to the frontend development efforts to ensure seamless integration and functionality.',
-    tags: ['Laravel', 'PHP', 'MySQL'],
-    year: '2024',
-    features: [
-      'Managed cross-team communication',
-      'Developed core backend systems',
-      'Assisted frontend integration',
-      'Ensured seamless functionality'
-    ],
-    image: '/images/rese-corner.webp',
-    link: 'http://resecorner.com/'
-  },
-]
+import { getFieldContent, type Project } from '@/lib/portfolio-data'
 
 export function ProjectsSection() {
   const theme = useGameStore((state) => state.theme)
+  const { projects } = getFieldContent(useGameStore((state) => state.field))
   const containerRef = useRef<HTMLDivElement>(null)
   const scrollableRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
-  const [selectedProject, setSelectedProject] = useState<typeof projects[0] | null>(null)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isImageError, setIsImageError] = useState(false)
   
   const { scrollYProgress } = useScroll({
@@ -136,7 +84,7 @@ export function ProjectsSection() {
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-px" style={{ backgroundColor: accent }} />
             <span className="text-sm tracking-[0.3em]" style={{ color: accent }}>
-              04 / PROJECTS
+              / PROJECTS
             </span>
           </div>
           
@@ -181,7 +129,7 @@ export function ProjectsSection() {
                     scale: hoveredId === project.id ? 1.1 : 1
                   }}
                 >
-                  0{project.id}
+                  {String(i + 1).padStart(2, '0')}
                 </motion.span>
 
                 <div className={`grid md:grid-cols-12 gap-6 items-center ${
@@ -384,7 +332,7 @@ export function ProjectsSection() {
                         className="absolute bottom-4 right-4 font-display text-6xl opacity-30"
                         style={{ color: accent }}
                       >
-                        0{selectedProject.id}
+                        {String(projects.findIndex((p) => p.id === selectedProject.id) + 1).padStart(2, '0')}
                       </div>
                     </motion.div>
 
